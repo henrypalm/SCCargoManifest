@@ -56,6 +56,8 @@
       background-color: black;
       padding: 2px 4px;
       border-radius: 3px;
+      display: inline-block;
+      min-width: 40px;
     }
     .section {
       margin-top: 30px;
@@ -131,8 +133,8 @@
   <script src="itemColors.js"></script>
 
   <script>
-    const itemNames = Object.keys(itemPrices);
-    const salvageItems = ["Construction Material", "Recycled Material Composite"];
+    const categories = Object.keys(itemPrices);
+
     const shipMiningBody = document.getElementById("shipMiningBody");
     const handMiningBody = document.getElementById("handMiningBody");
     const salvageBody = document.getElementById("salvageBody");
@@ -149,7 +151,7 @@
       document.getElementById("grandTotal").textContent = "Grand Total: " + grandTotal.toLocaleString();
     }
 
-    function createCargoRow(item, targetBody) {
+    function createCargoRow(item, targetBody, itemPricesForItem) {
       const row = document.createElement("tr");
       row.style.backgroundColor = itemColors[item] || "#1e1e1e";
 
@@ -165,7 +167,7 @@
 
       const locationCell = document.createElement("td");
       const locationSelect = document.createElement("select");
-      Object.keys(itemPrices[item]).forEach(location => {
+      Object.keys(itemPricesForItem).forEach(location => {
         const option = document.createElement("option");
         option.value = location;
         option.textContent = location;
@@ -187,7 +189,7 @@
 
       function updateRowTotals() {
         const location = locationSelect.value;
-        const unitPrice = itemPrices[item][location] || 0;
+        const unitPrice = itemPricesForItem[location] || 0;
         priceCell.innerHTML = `<span class="highlighted-text">${unitPrice.toLocaleString()}</span>`;
         const total = quantityInput.value * unitPrice;
         totalCell.innerHTML = `<span class="highlighted-text">${total.toLocaleString()}</span>`;
@@ -201,14 +203,28 @@
       updateRowTotals();
     }
 
-    itemNames.forEach(item => {
-      if (salvageItems.includes(item)) {
-        createCargoRow(item, salvageBody);
-      } else {
-        createCargoRow(item, shipMiningBody);
-      }
+    // Clear all table bodies first
+    shipMiningBody.innerHTML = "";
+    handMiningBody.innerHTML = "";
+    salvageBody.innerHTML = "";
+
+    categories.forEach(category => {
+      const targetBody = 
+        category === "Ship Mining" ? shipMiningBody :
+        category === "Handheld and Light Ship Mining" ? handMiningBody :
+        category === "Salvage" ? salvageBody :
+        null;
+
+      if (!targetBody) return; // skip unknown categories
+
+      const items = Object.keys(itemPrices[category]);
+      items.forEach(item => {
+        const itemPricesForItem = itemPrices[category][item];
+        createCargoRow(item, targetBody, itemPricesForItem);
+      });
     });
 
+    // Update title display as user types
     document.getElementById("manifestTitle").addEventListener("input", () => {
       const title = document.getElementById("manifestTitle").value;
       document.getElementById("manifestTitleDisplay").textContent = title.trim() !== "" ? title : "Cargo Manifest Calculator";
@@ -241,7 +257,6 @@
           const formattedTotal = isNaN(Number(total.replace(/,/g, ''))) ? total : Number(total.replace(/,/g, '')).toLocaleString();
 
           csv += `${item}|${qty}|${location}|${formattedPrice}|${formattedTotal}\n`;
-
         });
       });
     
@@ -251,7 +266,6 @@
       downloadFile(csv, filename);
       alert("Reminder: When opening the CSV file, set the pipe | as the delimiter.");
     }
-
 
     function exportTXT() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
