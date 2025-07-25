@@ -155,6 +155,7 @@
       locationSelect.addEventListener("change", updateRowTotals);
 
       cargoBody.appendChild(row);
+      updateRowTotals();
     }
 
     itemNames.forEach(createCargoRow);
