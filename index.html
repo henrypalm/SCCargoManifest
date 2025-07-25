@@ -37,7 +37,10 @@
 </head>
 <body>
 
-    <h2>Cargo Manifest Calculator</h2>
+    <label for="manifestTitle"><strong>Manifest Title:</strong></label>
+    <input type="text" id="manifestTitle" placeholder="Enter manifest title..." style="width: 300px; margin-bottom: 20px;">
+    <h2 id="manifestTitleDisplay">Cargo Manifest Calculator</h2>
+
     <table id="cargoTable">
         <thead>
             <tr>
@@ -57,11 +60,11 @@
     <button onclick="exportCSV()">Export CSV</button>
     <button onclick="exportTXT()">Export TXT</button>
 
-    <!-- Load external data first -->
+    <!-- Load external data -->
     <script src="itemPrices.js"></script>
     <script src="itemColors.js"></script>
 
-    <!-- Main logic -->
+    <!-- Main Script -->
     <script>
         const locations = ["Area18", "Lorville", "Orison"];
         const itemNames = Object.keys(itemPrices);
@@ -99,11 +102,11 @@
             locSelect.addEventListener("change", updateTotals);
             locCell.appendChild(locSelect);
 
-            // Unit price display
+            // Unit price
             const priceCell = document.createElement("td");
             priceCell.className = "price";
 
-            // Total display
+            // Total
             const totalCell = document.createElement("td");
             totalCell.className = "total-cell";
 
@@ -115,7 +118,6 @@
 
             cargoBody.appendChild(row);
 
-            // Initialize
             updateRow(row, item);
         });
 
@@ -148,9 +150,11 @@
         }
 
         function exportCSV() {
-            let csv = "Item,Quantity,Location,Unit Price,Total\n";
-            const rows = cargoBody.querySelectorAll("tr");
+            const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
+            let csv = `Title:,${title}\n`;
+            csv += "Item,Quantity,Location,Unit Price,Total\n";
 
+            const rows = cargoBody.querySelectorAll("tr");
             rows.forEach((row, index) => {
                 const item = itemNames[index];
                 const qty = row.children[1].firstChild.value;
@@ -160,13 +164,15 @@
                 csv += `${item},${qty},${location},${price},${total}\n`;
             });
 
-            downloadFile(csv, "cargo_manifest.csv");
+            csv += `\nGrand Total:,${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
+            downloadFile(csv, `${title.replace(/\s+/g, "_")}.csv`);
         }
 
         function exportTXT() {
-            let txt = "Cargo Manifest:\n\n";
-            const rows = cargoBody.querySelectorAll("tr");
+            const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
+            let txt = `Title: ${title}\n\n`;
 
+            const rows = cargoBody.querySelectorAll("tr");
             rows.forEach((row, index) => {
                 const item = itemNames[index];
                 const qty = row.children[1].firstChild.value;
@@ -177,18 +183,8 @@
             });
 
             txt += `\nGrand Total: ${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
-            downloadFile(txt, "cargo_manifest.txt");
+            downloadFile(txt, `${title.replace(/\s+/g, "_")}.txt`);
         }
 
         function downloadFile(content, filename) {
-            const blob = new Blob([content], { type: "text/plain" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-    </script>
-</body>
-</html>
+            const blob = ne
