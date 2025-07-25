@@ -237,7 +237,11 @@
           const location = row.children[2].firstChild.value.trim();
           const price = row.children[3].querySelector(".highlighted-text").textContent.trim();
           const total = row.children[4].querySelector(".highlighted-text").textContent.trim();
-          csv += `${item}|${qty}|${location}|${price}|${total}\n`;
+          const formattedPrice = isNaN(Number(price.replace(/,/g, ''))) ? price : Number(price.replace(/,/g, '')).toLocaleString();
+          const formattedTotal = isNaN(Number(total.replace(/,/g, ''))) ? total : Number(total.replace(/,/g, '')).toLocaleString();
+
+          csv += `${item}|${qty}|${location}|${formattedPrice}|${formattedTotal}\n`;
+
         });
       });
     
