@@ -49,6 +49,12 @@
     h2 {
       margin-top: 10px;
     }
+    .highlighted-text {
+      color: white;
+      background-color: black;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
@@ -60,11 +66,11 @@
   <table>
     <thead>
       <tr>
-        <th>Item</th>
-        <th>Quantity</th>
-        <th>Location</th>
-        <th>Unit Price</th>
-        <th>Total</th>
+        <th><span class="highlighted-text">Item</span></th>
+        <th><span class="highlighted-text">Quantity</span></th>
+        <th><span class="highlighted-text">Location</span></th>
+        <th><span class="highlighted-text">Unit Price Per SCU</span></th>
+        <th><span class="highlighted-text">Total</span></th>
       </tr>
     </thead>
     <tbody id="cargoBody"></tbody>
@@ -77,7 +83,6 @@
     <button onclick="exportTXT()">Export TXT</button>
   </div>
 
-  <!-- Load external JS data -->
   <script src="itemPrices.js"></script>
   <script src="itemColors.js"></script>
 
@@ -88,7 +93,8 @@
     function updateGrandTotal() {
       let grandTotal = 0;
       cargoBody.querySelectorAll("tr").forEach(row => {
-        const total = parseFloat(row.children[4].textContent.replace(/,/g, '')) || 0;
+        const totalCell = row.children[4].querySelector(".highlighted-text");
+        const total = parseFloat(totalCell?.textContent.replace(/,/g, '')) || 0;
         grandTotal += total;
       });
       document.getElementById("grandTotal").textContent = "Grand Total: " + grandTotal.toLocaleString();
@@ -100,7 +106,7 @@
 
       // Item name cell
       const itemCell = document.createElement("td");
-      itemCell.textContent = item;
+      itemCell.innerHTML = `<span class="highlighted-text">${item}</span>`;
 
       // Quantity input cell
       const quantityCell = document.createElement("td");
@@ -121,13 +127,13 @@
       });
       locationCell.appendChild(locationSelect);
 
-      // Unit price
+      // Unit price cell
       const priceCell = document.createElement("td");
-      priceCell.textContent = "0";
+      priceCell.innerHTML = `<span class="highlighted-text">0</span>`;
 
-      // Total
+      // Total cell
       const totalCell = document.createElement("td");
-      totalCell.textContent = "0";
+      totalCell.innerHTML = `<span class="highlighted-text">0</span>`;
 
       row.appendChild(itemCell);
       row.appendChild(quantityCell);
@@ -139,9 +145,9 @@
       function updateRowTotals() {
         const location = locationSelect.value;
         const unitPrice = itemPrices[item][location] || 0;
-        priceCell.textContent = unitPrice.toLocaleString();
+        priceCell.innerHTML = `<span class="highlighted-text">${unitPrice.toLocaleString()}</span>`;
         const total = quantityInput.value * unitPrice;
-        totalCell.textContent = total.toLocaleString();
+        totalCell.innerHTML = `<span class="highlighted-text">${total.toLocaleString()}</span>`;
         updateGrandTotal();
       }
 
@@ -180,8 +186,8 @@
         const item = itemNames[index];
         const qty = row.children[1].firstChild.value;
         const location = row.children[2].firstChild.value;
-        const price = row.children[3].textContent;
-        const total = row.children[4].textContent;
+        const price = row.children[3].querySelector(".highlighted-text").textContent;
+        const total = row.children[4].querySelector(".highlighted-text").textContent;
         csv += `${item},${qty},${location},${price},${total}\n`;
       });
 
@@ -200,8 +206,8 @@
         const item = itemNames[index];
         const qty = row.children[1].firstChild.value;
         const location = row.children[2].firstChild.value;
-        const price = row.children[3].textContent;
-        const total = row.children[4].textContent;
+        const price = row.children[3].querySelector(".highlighted-text").textContent;
+        const total = row.children[4].querySelector(".highlighted-text").textContent;
         txt += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${price} | Total: ${total}\n`;
       });
 
