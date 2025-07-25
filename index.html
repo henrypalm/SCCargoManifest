@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cargo Manifest Calculator</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #444;
+        }
+        input, select, button {
+            padding: 5px;
+            background-color: #2e2e2e;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Cargo Manifest Calculator</h2>
+    <table id="cargoTable">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Location</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody id="cargoBody">
+            <!-- Rows populated by script -->
+        </tbody>
+    </table>
+
+    <div class="total" id="grandTotal">Grand Total: 0 aUEC</div>
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="exportTXT()">Export TXT</button>
+
+    <!-- Load external data first -->
+    <script src="itemPrices.js"></script>
+    <script src="itemColors.js"></script>
+
+    <!-- Main logic -->
+    <script>
+        const locations = ["Area18", "Lorville", "Orison"];
+        const itemNames = Object.keys(itemPrices);
+
+        const cargoBody = document.getElementById("cargoBody");
+
+        itemNames.forEach(item => {
+            const row = document.createElement("tr");
+
+            // Item name
+            const nameCell = document.createElement("td");
+            nameCell.textContent = item;
+            if (itemColors && itemColors[item]) {
+                nameCell.style.color = itemColors[item];
+            }
+
+            // Quantity input
+            const qtyCell = document.createElement("td");
+            const qtyInput = document.createElement("input");
+            qtyInput.type = "number";
+            qtyInput.min = "0";
+            qtyInput.value = "0";
+            qtyInput.addEventListener("input", updateTotals);
+            qtyCell.appendChild(qtyInput);
+
+            // Location dropdown
+            const locCell = document.createElement("td");
+            const locSelect = document.createElement("select");
+            locations.forEach(loc => {
+                const option = document.createElement("option");
+                option.value = loc;
+                option.textContent = loc;
+                locSelect.appendChild(option);
+            });
+            locSelect.addEventListener("change", updateTotals);
+            locCell.appendChild(locSelect);
+
+            // Unit price display
+            const priceCell = document.createElement("td");
+            priceCell.className = "price";
+
+            // Total display
+            const totalCell = document.createElement("td");
+            totalCell.className = "total-cell";
+
+            row.appendChild(nameCell);
+            row.appendChild(qtyCell);
+            row.appendChild(locCell);
+            row.appendChild(priceCell);
+            row.appendChild(totalCell);
+
+            cargoBody.appendChild(row);
+
+            // Initialize
+            updateRow(row, item);
+        });
+
+        function updateRow(row, item) {
+            const qty = parseFloat(row.children[1].firstChild.value) || 0;
+            const location = row.children[2].firstChild.value;
+            const unitPrice = itemPrices[item][location] || 0;
+            const total = qty * unitPrice;
+
+            row.children[3].textContent = unitPrice.toFixed(2);
+            row.children[4].textContent = total.toFixed(2);
+
+            updateGrandTotal();
+        }
+
+        function updateTotals() {
+            const rows = cargoBody.querySelectorAll("tr");
+            rows.forEach((row, index) => {
+                updateRow(row, itemNames[index]);
+            });
+        }
+
+        function updateGrandTotal() {
+            let grandTotal = 0;
+            const totalCells = document.querySelectorAll(".total-cell");
+            totalCells.forEach(cell => {
+                grandTotal += parseFloat(cell.textContent) || 0;
+            });
+            document.getElementById("grandTotal").textContent = "Grand Total: " + grandTotal.toFixed(2) + " aUEC";
+        }
+
+        function exportCSV() {
+            let csv = "Item,Quantity,Location,Unit Price,Total\n";
+            const rows = cargoBody.querySelectorAll("tr");
+
+            rows.forEach((row, index) => {
+                const item = itemNames[index];
+                const qty = row.children[1].firstChild.value;
+                const location = row.children[2].firstChild.value;
+                const price = row.children[3].textContent;
+                const total = row.children[4].textContent;
+                csv += `${item},${qty},${location},${price},${total}\n`;
+            });
+
+            downloadFile(csv, "cargo_manifest.csv");
+        }
+
+        function exportTXT() {
+            let txt = "Cargo Manifest:\n\n";
+            const rows = cargoBody.querySelectorAll("tr");
+
+            rows.forEach((row, index) => {
+                const item = itemNames[index];
+                const qty = row.children[1].firstChild.value;
+                const location = row.children[2].firstChild.value;
+                const price = row.children[3].textContent;
+                const total = row.children[4].textContent;
+                txt += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${price} | Total: ${total}\n`;
+            });
+
+            txt += `\nGrand Total: ${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
+            downloadFile(txt, "cargo_manifest.txt");
+        }
+
+        function downloadFile(content, filename) {
+            const blob = new Blob([content], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
