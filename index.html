@@ -23,7 +23,7 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     th, td {
       padding: 10px;
@@ -48,14 +48,21 @@
     button:hover {
       background-color: #218838;
     }
-    h2, h3 {
-      margin-top: 30px;
+    h2 {
+      margin-top: 10px;
     }
     .highlighted-text {
       color: white;
       background-color: black;
       padding: 2px 4px;
       border-radius: 3px;
+    }
+    .section {
+      margin-top: 30px;
+    }
+    .section h3 {
+      margin-bottom: 5px;
+      color: gold;
     }
   </style>
 </head>
@@ -65,50 +72,53 @@
   <label for="manifestTitle"><strong>Manifest Title:</strong></label>
   <input type="text" id="manifestTitle" placeholder="Enter manifest title..." style="width: 300px;" />
 
-  <!-- Section: Minerals -->
-  <h3>Minerals</h3>
-  <table>
-    <thead>
-      <tr>
-        <th><span class="highlighted-text">Item</span></th>
-        <th><span class="highlighted-text">Quantity</span></th>
-        <th><span class="highlighted-text">Location</span></th>
-        <th><span class="highlighted-text">Unit Price Per SCU</span></th>
-        <th><span class="highlighted-text">Total</span></th>
-      </tr>
-    </thead>
-    <tbody id="mineralsBody"></tbody>
-  </table>
+  <div class="section">
+    <h3>Ship Mining</h3>
+    <table>
+      <thead>
+        <tr>
+          <th><span class="highlighted-text">Item</span></th>
+          <th><span class="highlighted-text">Quantity</span></th>
+          <th><span class="highlighted-text">Location</span></th>
+          <th><span class="highlighted-text">Unit Price Per SCU</span></th>
+          <th><span class="highlighted-text">Total</span></th>
+        </tr>
+      </thead>
+      <tbody id="shipMiningBody"></tbody>
+    </table>
+  </div>
 
-  <!-- Section: Gases -->
-  <h3>Gases</h3>
-  <table>
-    <thead>
-      <tr>
-        <th><span class="highlighted-text">Item</span></th>
-        <th><span class="highlighted-text">Quantity</span></th>
-        <th><span class="highlighted-text">Location</span></th>
-        <th><span class="highlighted-text">Unit Price Per SCU</span></th>
-        <th><span class="highlighted-text">Total</span></th>
-      </tr>
-    </thead>
-    <tbody id="gasesBody"></tbody>
-  </table>
+  <div class="section">
+    <h3>Handheld and Light Ship Mining</h3>
+    <table>
+      <thead>
+        <tr>
+          <th><span class="highlighted-text">Item</span></th>
+          <th><span class="highlighted-text">Quantity</span></th>
+          <th><span class="highlighted-text">Location</span></th>
+          <th><span class="highlighted-text">Unit Price Per SCU</span></th>
+          <th><span class="highlighted-text">Total</span></th>
+        </tr>
+      </thead>
+      <tbody id="handMiningBody"></tbody>
+    </table>
+  </div>
 
-  <!-- Section: Metals -->
-  <h3>Metals</h3>
-  <table>
-    <thead>
-      <tr>
-        <th><span class="highlighted-text">Item</span></th>
-        <th><span class="highlighted-text">Quantity</span></th>
-        <th><span class="highlighted-text">Location</span></th>
-        <th><span class="highlighted-text">Unit Price Per SCU</span></th>
-        <th><span class="highlighted-text">Total</span></th>
-      </tr>
-    </thead>
-    <tbody id="metalsBody"></tbody>
-  </table>
+  <div class="section">
+    <h3>Salvage</h3>
+    <table>
+      <thead>
+        <tr>
+          <th><span class="highlighted-text">Item</span></th>
+          <th><span class="highlighted-text">Quantity</span></th>
+          <th><span class="highlighted-text">Location</span></th>
+          <th><span class="highlighted-text">Unit Price Per SCU</span></th>
+          <th><span class="highlighted-text">Total</span></th>
+        </tr>
+      </thead>
+      <tbody id="salvageBody"></tbody>
+    </table>
+  </div>
 
   <h3 id="grandTotal">Grand Total: 0</h3>
 
@@ -122,16 +132,15 @@
 
   <script>
     const itemNames = Object.keys(itemPrices);
-    const itemSections = {
-      mineralsBody: ["Quantanium", "Riccite", "Agricium"],
-      gasesBody: ["Hydrogen", "Helium"],
-      metalsBody: ["Stileron", "Taranite", "Bexalite"]
-    };
+    const salvageItems = ["Construction Material", "Recycled Material Composite"];
+    const shipMiningBody = document.getElementById("shipMiningBody");
+    const handMiningBody = document.getElementById("handMiningBody");
+    const salvageBody = document.getElementById("salvageBody");
 
     function updateGrandTotal() {
       let grandTotal = 0;
-      document.querySelectorAll("tbody").forEach(tbody => {
-        tbody.querySelectorAll("tr").forEach(row => {
+      document.querySelectorAll("tbody").forEach(body => {
+        body.querySelectorAll("tr").forEach(row => {
           const totalCell = row.children[4].querySelector(".highlighted-text");
           const total = parseFloat(totalCell?.textContent.replace(/,/g, '')) || 0;
           grandTotal += total;
@@ -140,8 +149,7 @@
       document.getElementById("grandTotal").textContent = "Grand Total: " + grandTotal.toLocaleString();
     }
 
-    function createCargoRow(item, containerId) {
-      const container = document.getElementById(containerId);
+    function createCargoRow(item, targetBody) {
       const row = document.createElement("tr");
       row.style.backgroundColor = itemColors[item] || "#1e1e1e";
 
@@ -189,17 +197,21 @@
       quantityInput.addEventListener("input", updateRowTotals);
       locationSelect.addEventListener("change", updateRowTotals);
 
-      container.appendChild(row);
+      targetBody.appendChild(row);
       updateRowTotals();
     }
 
-    for (const [sectionId, items] of Object.entries(itemSections)) {
-      items.forEach(item => createCargoRow(item, sectionId));
-    }
+    itemNames.forEach(item => {
+      if (salvageItems.includes(item)) {
+        createCargoRow(item, salvageBody);
+      } else {
+        createCargoRow(item, shipMiningBody);
+      }
+    });
 
     document.getElementById("manifestTitle").addEventListener("input", () => {
-      const title = document.getElementById("manifestTitle").value.trim();
-      document.getElementById("manifestTitleDisplay").textContent = title || "Cargo Manifest Calculator";
+      const title = document.getElementById("manifestTitle").value;
+      document.getElementById("manifestTitleDisplay").textContent = title.trim() !== "" ? title : "Cargo Manifest Calculator";
     });
 
     function downloadFile(content, filename) {
@@ -214,13 +226,12 @@
 
     function exportCSV() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let csv = `Title:,${title}\n`;
-      csv += "Item,Quantity,Location,Unit Price,Total\n";
+      let csv = `Title:,${title}\nItem,Quantity,Location,Unit Price,Total\n`;
+      const bodies = [shipMiningBody, handMiningBody, salvageBody];
 
-      Object.entries(itemSections).forEach(([sectionId, items]) => {
-        const tbody = document.getElementById(sectionId);
-        items.forEach((item, i) => {
-          const row = tbody.children[i];
+      bodies.forEach(body => {
+        body.querySelectorAll("tr").forEach(row => {
+          const item = row.children[0].textContent;
           const qty = row.children[1].firstChild.value;
           if (!qty || Number(qty) === 0) return;
           const location = row.children[2].firstChild.value;
@@ -232,17 +243,18 @@
 
       csv += `\nGrand Total:,${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      downloadFile(csv, `${title.replace(/\s+/g, "_")}_${timestamp}.csv`);
+      const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
+      downloadFile(csv, filename);
     }
 
     function exportTXT() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
       let txt = `Title: ${title}\n\n`;
+      const bodies = [shipMiningBody, handMiningBody, salvageBody];
 
-      Object.entries(itemSections).forEach(([sectionId, items]) => {
-        const tbody = document.getElementById(sectionId);
-        items.forEach((item, i) => {
-          const row = tbody.children[i];
+      bodies.forEach(body => {
+        body.querySelectorAll("tr").forEach(row => {
+          const item = row.children[0].textContent;
           const qty = row.children[1].firstChild.value;
           if (!qty || Number(qty) === 0) return;
           const location = row.children[2].firstChild.value;
@@ -254,7 +266,8 @@
 
       txt += `\nGrand Total: ${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      downloadFile(txt, `${title.replace(/\s+/g, "_")}_${timestamp}.txt`);
+      const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.txt`;
+      downloadFile(txt, filename);
     }
   </script>
 </body>
