@@ -13,6 +13,6 @@ const itemColors = {
   "Agricium": "#ADD8E6",
   "Hephaestanite": "#ADD8E6",
   "Recycled Material Composite": "#FFD700",
-  "Construction Material": "#FF0000"
+  "Construction Material": "#ADD8E6"
 };
 
