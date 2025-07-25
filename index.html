@@ -245,6 +245,7 @@
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
       downloadFile(csv, filename);
+      alert("Reminder: When opening the CSV file, set the pipe | as the delimiter.");
     }
 
 
