@@ -2,35 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cargo Manifest Calculator</title>
   <style>
     body {
-      background-color: #1e1e1e;
-      color: #f0f0f0;
       font-family: Arial, sans-serif;
-      padding: 20px;
+      background-color: #111;
+      color: #eee;
+      margin: 20px;
+    }
+    input, select {
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #555;
+      background-color: #222;
+      color: #eee;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 1rem;
+      margin-top: 20px;
     }
     th, td {
       padding: 10px;
       border: 1px solid #444;
+      text-align: center;
     }
-    input, select, button {
-      padding: 5px;
-      background-color: #2e2e2e;
-      color: #fff;
-      border: 1px solid #444;
-      border-radius: 5px;
+    th {
+      background-color: #222;
+    }
+    .button-container {
+      margin-top: 20px;
     }
     button {
+      padding: 10px 15px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: white;
       cursor: pointer;
     }
-    .total {
-      font-weight: bold;
+    button:hover {
+      background-color: #218838;
+    }
+    h2 {
       margin-top: 10px;
     }
   </style>
@@ -38,10 +54,10 @@
 <body>
 
   <label for="manifestTitle"><strong>Manifest Title:</strong></label>
-  <input type="text" id="manifestTitle" placeholder="Enter manifest title..." style="width: 300px; margin-bottom: 20px;">
+  <input type="text" id="manifestTitle" placeholder="Enter manifest title..." style="width: 300px;" />
   <h2 id="manifestTitleDisplay">Cargo Manifest Calculator</h2>
 
-  <table id="cargoTable">
+  <table>
     <thead>
       <tr>
         <th>Item</th>
@@ -51,100 +67,107 @@
         <th>Total</th>
       </tr>
     </thead>
-    <tbody id="cargoBody">
-      <!-- Rows added dynamically -->
-    </tbody>
+    <tbody id="cargoBody"></tbody>
   </table>
 
-  <div class="total" id="grandTotal">Grand Total: 0 aUEC</div>
-  <button onclick="exportCSV()">Export CSV</button>
-  <button onclick="exportTXT()">Export TXT</button>
+  <h3 id="grandTotal">Grand Total: 0</h3>
 
-  <!-- External data scripts (must load before main logic) -->
+  <div class="button-container">
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="exportTXT()">Export TXT</button>
+  </div>
+
+  <!-- Load external JS data -->
   <script src="itemPrices.js"></script>
   <script src="itemColors.js"></script>
 
-  <!-- Main logic after all resources are loaded -->
   <script>
-    const locations = ["Area18", "Lorville", "Orison"];
     const itemNames = Object.keys(itemPrices);
-
     const cargoBody = document.getElementById("cargoBody");
-
-    itemNames.forEach(item => {
-      const row = document.createElement("tr");
-
-      // Item name
-      const nameCell = document.createElement("td");
-      nameCell.textContent = item;
-      if (itemColors && itemColors[item]) {
-        nameCell.style.color = itemColors[item];
-      }
-
-      // Quantity input
-      const qtyCell = document.createElement("td");
-      const qtyInput = document.createElement("input");
-      qtyInput.type = "number";
-      qtyInput.min = "0";
-      qtyInput.value = "0";
-      qtyInput.addEventListener("input", updateTotals);
-      qtyCell.appendChild(qtyInput);
-
-      // Location dropdown
-      const locCell = document.createElement("td");
-      const locSelect = document.createElement("select");
-      locations.forEach(loc => {
-        const option = document.createElement("option");
-        option.value = loc;
-        option.textContent = loc;
-        locSelect.appendChild(option);
-      });
-      locSelect.addEventListener("change", updateTotals);
-      locCell.appendChild(locSelect);
-
-      // Unit price and total cells
-      const priceCell = document.createElement("td");
-      priceCell.className = "price";
-      const totalCell = document.createElement("td");
-      totalCell.className = "total-cell";
-
-      row.appendChild(nameCell);
-      row.appendChild(qtyCell);
-      row.appendChild(locCell);
-      row.appendChild(priceCell);
-      row.appendChild(totalCell);
-
-      cargoBody.appendChild(row);
-
-      updateRow(row, item);
-    });
-
-    function updateRow(row, item) {
-      const qty = parseFloat(row.children[1].firstChild.value) || 0;
-      const location = row.children[2].firstChild.value;
-      const unitPrice = itemPrices[item][location] || 0;
-      const total = qty * unitPrice;
-
-      row.children[3].textContent = unitPrice.toFixed(2);
-      row.children[4].textContent = total.toFixed(2);
-
-      updateGrandTotal();
-    }
-
-    function updateTotals() {
-      const rows = cargoBody.querySelectorAll("tr");
-      rows.forEach((row, index) => {
-        updateRow(row, itemNames[index]);
-      });
-    }
 
     function updateGrandTotal() {
       let grandTotal = 0;
-      const totalCells = document.querySelectorAll(".total-cell");
-      totalCells.forEach(cell => {
-        grandTotal += parseFloat(cell.textContent) || 0;
+      cargoBody.querySelectorAll("tr").forEach(row => {
+        const total = parseFloat(row.children[4].textContent.replace(/,/g, '')) || 0;
+        grandTotal += total;
       });
-      document.getElementById("grandTotal").textContent = "Grand Total: " + grandTotal.toFixed(2) + " aUEC";
+      document.getElementById("grandTotal").textContent = "Grand Total: " + grandTotal.toLocaleString();
+    }
+
+    function createCargoRow(item) {
+      const row = document.createElement("tr");
+      row.style.backgroundColor = itemColors[item] || "#1e1e1e";
+
+      // Item name cell
+      const itemCell = document.createElement("td");
+      itemCell.textContent = item;
+
+      // Quantity input cell
+      const quantityCell = document.createElement("td");
+      const quantityInput = document.createElement("input");
+      quantityInput.type = "number";
+      quantityInput.min = 0;
+      quantityInput.value = 0;
+      quantityCell.appendChild(quantityInput);
+
+      // Location dropdown
+      const locationCell = document.createElement("td");
+      const locationSelect = document.createElement("select");
+      Object.keys(itemPrices[item]).forEach(location => {
+        const option = document.createElement("option");
+        option.value = location;
+        option.textContent = location;
+        locationSelect.appendChild(option);
+      });
+      locationCell.appendChild(locationSelect);
+
+      // Unit price
+      const priceCell = document.createElement("td");
+      priceCell.textContent = "0";
+
+      // Total
+      const totalCell = document.createElement("td");
+      totalCell.textContent = "0";
+
+      row.appendChild(itemCell);
+      row.appendChild(quantityCell);
+      row.appendChild(locationCell);
+      row.appendChild(priceCell);
+      row.appendChild(totalCell);
+
+      // Event listeners
+      function updateRowTotals() {
+        const location = locationSelect.value;
+        const unitPrice = itemPrices[item][location] || 0;
+        priceCell.textContent = unitPrice.toLocaleString();
+        const total = quantityInput.value * unitPrice;
+        totalCell.textContent = total.toLocaleString();
+        updateGrandTotal();
+      }
+
+      quantityInput.addEventListener("input", updateRowTotals);
+      locationSelect.addEventListener("change", updateRowTotals);
+
+      cargoBody.appendChild(row);
+    }
+
+    itemNames.forEach(createCargoRow);
+
+    // Title live update
+    document.getElementById("manifestTitle").addEventListener("input", () => {
+      const display = document.getElementById("manifestTitleDisplay");
+      const title = document.getElementById("manifestTitle").value;
+      display.textContent = title.trim() !== "" ? title : "Cargo Manifest Calculator";
+    });
+
+    function downloadFile(content, filename) {
+      const blob = new Blob([content], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function exportCSV() {
@@ -163,7 +186,9 @@
       });
 
       csv += `\nGrand Total:,${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
-      downloadFile(csv, `${title.replace(/\s+/g, "_")}.csv`);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
+      downloadFile(csv, filename);
     }
 
     function exportTXT() {
@@ -181,24 +206,10 @@
       });
 
       txt += `\nGrand Total: ${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
-      downloadFile(txt, `${title.replace(/\s+/g, "_")}.txt`);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.txt`;
+      downloadFile(txt, filename);
     }
-
-    function downloadFile(content, filename) {
-      const blob = new Blob([content], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    document.getElementById("manifestTitle").addEventListener("input", () => {
-      const display = document.getElementById("manifestTitleDisplay");
-      const title = document.getElementById("manifestTitle").value;
-      display.textContent = title.trim() !== "" ? title : "Cargo Manifest Calculator";
-    });
   </script>
 </body>
 </html>
