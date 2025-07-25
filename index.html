@@ -242,10 +242,16 @@
 
     function exportCSV() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let csv = `Title:|${title}\nItem|Quantity|Location|Unit Price|Total\n`;
-      const bodies = [shipMiningBody, handMiningBody, salvageBody];
+      let csv = `Title:|${title}\nCategory|Item|Quantity|Location|Unit Price|Total\n`;
+      // We'll map tbody elements to category names for easier iteration:
+      const categoryMap = {
+        shipMiningBody: "Ship Mining",
+        handMiningBody: "Handheld and Light Ship Mining",
+        salvageBody: "Salvage"
+      };
     
-      bodies.forEach(body => {
+      [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
+        const category = categoryMap[body.id];
         body.querySelectorAll("tr").forEach(row => {
           const item = row.children[0].textContent.trim();
           const qty = row.children[1].firstChild.value.trim();
@@ -255,8 +261,8 @@
           const total = row.children[4].querySelector(".highlighted-text").textContent.trim();
           const formattedPrice = isNaN(Number(price.replace(/,/g, ''))) ? price : Number(price.replace(/,/g, '')).toLocaleString();
           const formattedTotal = isNaN(Number(total.replace(/,/g, ''))) ? total : Number(total.replace(/,/g, '')).toLocaleString();
-
-          csv += `${item}|${qty}|${location}|${formattedPrice}|${formattedTotal}\n`;
+    
+          csv += `${category}|${item}|${qty}|${location}|${formattedPrice}|${formattedTotal}\n`;
         });
       });
     
@@ -266,13 +272,19 @@
       downloadFile(csv, filename);
       alert("Reminder: When opening the CSV file, set the pipe | as the delimiter.");
     }
-
+    
     function exportTXT() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
       let txt = `Title: ${title}\n\n`;
-      const bodies = [shipMiningBody, handMiningBody, salvageBody];
-
-      bodies.forEach(body => {
+      const categoryMap = {
+        shipMiningBody: "Ship Mining",
+        handMiningBody: "Handheld and Light Ship Mining",
+        salvageBody: "Salvage"
+      };
+    
+      [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
+        const category = categoryMap[body.id];
+        txt += `Category: ${category}\n`;
         body.querySelectorAll("tr").forEach(row => {
           const item = row.children[0].textContent;
           const qty = row.children[1].firstChild.value;
@@ -282,13 +294,15 @@
           const total = row.children[4].querySelector(".highlighted-text").textContent;
           txt += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${price} | Total: ${total}\n`;
         });
+        txt += `\n`;
       });
-
-      txt += `\nGrand Total: ${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
+    
+      txt += `Grand Total: ${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.txt`;
       downloadFile(txt, filename);
     }
+
   </script>
 </body>
 </html>
