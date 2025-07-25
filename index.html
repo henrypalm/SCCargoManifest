@@ -226,26 +226,27 @@
 
     function exportCSV() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let csv = `Title:,${title}\nItem,Quantity,Location,Unit Price,Total\n`;
+      let csv = `Title:|${title}\nItem|Quantity|Location|Unit Price|Total\n`;
       const bodies = [shipMiningBody, handMiningBody, salvageBody];
-
+    
       bodies.forEach(body => {
         body.querySelectorAll("tr").forEach(row => {
-          const item = row.children[0].textContent;
-          const qty = row.children[1].firstChild.value;
+          const item = row.children[0].textContent.trim();
+          const qty = row.children[1].firstChild.value.trim();
           if (!qty || Number(qty) === 0) return;
-          const location = row.children[2].firstChild.value;
-          const price = row.children[3].querySelector(".highlighted-text").textContent;
-          const total = row.children[4].querySelector(".highlighted-text").textContent;
-          csv += `${item},${qty},${location},${price},${total}\n`;
+          const location = row.children[2].firstChild.value.trim();
+          const price = row.children[3].querySelector(".highlighted-text").textContent.trim();
+          const total = row.children[4].querySelector(".highlighted-text").textContent.trim();
+          csv += `${item}|${qty}|${location}|${price}|${total}\n`;
         });
       });
-
-      csv += `\nGrand Total:,${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
+    
+      csv += `\nGrand Total:|${document.getElementById("grandTotal").textContent.split(": ")[1]}`;
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
       downloadFile(csv, filename);
     }
+
 
     function exportTXT() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
