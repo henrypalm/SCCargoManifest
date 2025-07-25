@@ -113,7 +113,7 @@
       const quantityInput = document.createElement("input");
       quantityInput.type = "number";
       quantityInput.min = 0;
-      quantityInput.value = 0;
+      quantityInput.value = "";
       quantityCell.appendChild(quantityInput);
 
       // Location dropdown
@@ -185,6 +185,7 @@
       rows.forEach((row, index) => {
         const item = itemNames[index];
         const qty = row.children[1].firstChild.value;
+        if (!qty || Number(qty) === 0) return;
         const location = row.children[2].firstChild.value;
         const price = row.children[3].querySelector(".highlighted-text").textContent;
         const total = row.children[4].querySelector(".highlighted-text").textContent;
@@ -205,6 +206,7 @@
       rows.forEach((row, index) => {
         const item = itemNames[index];
         const qty = row.children[1].firstChild.value;
+        if (!qty || Number(qty) === 0) return;
         const location = row.children[2].firstChild.value;
         const price = row.children[3].querySelector(".highlighted-text").textContent;
         const total = row.children[4].querySelector(".highlighted-text").textContent;
