@@ -1,6 +1,17 @@
 // itemPrices.js
-const itemPrices = {
-    "Quantanium": { "Area18": 275, "Lorville": 260.5, "Orison": 280 },
-    "Bexalite": { "Area18": 180, "Lorville": 190, "Orison": 185.5 },
-    "RMC": { "Area18": 14.5, "Lorville": 15, "Orison": 15.2 }
+const itemColors = {
+  "Stileron": "#FFD700",
+  "Quantanium": "#FFD700",
+  "Riccite": "#FFD700",
+  "Taranite": "#006400",
+  "Bexalite": "#006400",
+  "Gold": "#006400",
+  "Diamond": "#006400",
+  "Borase": "#ADD8E6",
+  "Laranite": "#ADD8E6",
+  "Beryl": "#ADD8E6",
+  "Agricium": "#ADD8E6",
+  "Hephaestanite": "#ADD8E6",
+  "Recycled Material Composite": "#FFD700",
+  "Construction Material": "#FF0000"
 };
