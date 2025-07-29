@@ -166,16 +166,16 @@ const itemPrices = {
   },
   "Handheld and Light Ship Mining": {
     "Janalite" : {
-      "No data": 123
+      "No Location data": 123
     },
     "Hadanite" : {
-      "No data": 123
+      "No Location data": 123
     },
     "Feynmaline" : {
-      "No data": 123
+      "No Location data": 123
     },
     "Aphorite" : {
-      "No data": 123
+      "No Location data": 123
     }
   },
   "Salvage": {
