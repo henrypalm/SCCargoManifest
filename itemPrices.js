@@ -165,23 +165,20 @@ const itemPrices = {
     }
   },
   "Handheld and Light Ship Mining": {
-    // No items for now
+    "Janalite" : {
+      "No data": 123
+    }
+    "Hadanite" : {
+      "No data": 123
+    },
+    "Feynmaline" : {
+      "No data": 123
+    }
+    "Aphorite" : {
+      "No data": 123
+    },
   },
   "Salvage": {
-    "Construction Material": {
-      "HUR L1, STANTON": 2414.5,
-      "ARC L1, STANTON": 2414,
-      "HUR L4, STANTON": 2414,
-      "HUR L3, STANTON": 2412,
-      "MEGUMI REFUELING, PYRO": 2300,
-      "NEW CABBAGE, MICROTECH, STANTON": 2188.51,
-      "RUIN STATION, TERMINUS, PYRO": 2170.5,
-      "CHECKMATE, PYRO": 2160,
-      "LORVILLE, HURSTON, STANTON": 2152,
-      "OBITUARY, BLOOM, PYRO": 2147,
-      "ORISON, CRUSADER, STANTON": 2140.51,
-      "AREA 18, ARCCORP, STANTON": 2124.5
-    },
     "Recycled Material Composite": {
       "SEER'S CANYON, VATRA, PYRO V, PYRO": 11216,
       "TERRA MILLS HYDROFARM, CELLIN, CRUSADER, STANTON": 11097,
@@ -195,6 +192,20 @@ const itemPrices = {
       "STARLIGHT SERVICE STATION, PYRO": 10500,
       "ROD'S FUEL 'N SUPPLIES, PYRO": 10500,
       "ENDGAME, PYRO": 10500
+    },
+    "Construction Material": {
+      "HUR L1, STANTON": 2414.5,
+      "ARC L1, STANTON": 2414,
+      "HUR L4, STANTON": 2414,
+      "HUR L3, STANTON": 2412,
+      "MEGUMI REFUELING, PYRO": 2300,
+      "NEW CABBAGE, MICROTECH, STANTON": 2188.51,
+      "RUIN STATION, TERMINUS, PYRO": 2170.5,
+      "CHECKMATE, PYRO": 2160,
+      "LORVILLE, HURSTON, STANTON": 2152,
+      "OBITUARY, BLOOM, PYRO": 2147,
+      "ORISON, CRUSADER, STANTON": 2140.51,
+      "AREA 18, ARCCORP, STANTON": 2124.5
     }
   }
 };
