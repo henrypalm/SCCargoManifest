@@ -191,7 +191,10 @@ const itemPrices = {
       "DUDLEY & DAUGHTERS, PYRO": 10500,
       "STARLIGHT SERVICE STATION, PYRO": 10500,
       "ROD'S FUEL 'N SUPPLIES, PYRO": 10500,
-      "ENDGAME, PYRO": 10500
+      "ENDGAME, PYRO": 10500,
+      "Orison, Crusader, Stanton" : 10424.5,
+      "Providence Platform, Orison, Crusader, Stanton" : 10339.5,
+      "Grim Hex, Yela, Crusader, Stanton" :  9265
     },
     "Construction Material": {
       "HUR L1, STANTON": 2414.5,
