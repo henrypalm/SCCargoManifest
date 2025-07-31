@@ -247,12 +247,12 @@
       for (const category in itemPrices) {
         const body =
           category === "Ship Mining" ? shipMiningBody :
-          category === "Hand Mining" ? handMiningBody :
+          category === "Handheld and Light Ship Mining" ? handMiningBody :
           category === "Salvage" ? salvageBody :
           null;
-  
+    
         if (!body) continue;
-  
+    
         const items = itemPrices[category];
         for (const item in items) {
           const row = createRow(category, item, items[item]);
@@ -260,6 +260,7 @@
         }
       }
     }
+
   
     populateTables();
   </script>
