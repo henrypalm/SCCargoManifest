@@ -110,7 +110,7 @@
   </details>
 
   <details open>
-    <summary>Hand Mining</summary>
+    <summary>Handheld and Light Ship Mining</summary>
     <table>
       <thead>
         <tr>
@@ -150,145 +150,122 @@
   <script src="itemPrices.js"></script>
   <script src="itemColors.js"></script>
   <script>
-    window.onload = function () {
-      const shipMiningBody = document.getElementById("shipMiningBody");
-      const handMiningBody = document.getElementById("handMiningBody");
-      const salvageBody = document.getElementById("salvageBody");
+    const shipMiningBody = document.getElementById("shipMiningBody");
+    const handMiningBody = document.getElementById("handMiningBody");
+    const salvageBody = document.getElementById("salvageBody");
 
-      function updateGrandTotal() {
-        let total = 0;
-        [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
-          Array.from(body.children).forEach(row => {
-            const value = parseFloat(row.children[4].querySelector("span").textContent.replace(/,/g, ""));
-            total += isNaN(value) ? 0 : value;
-          });
-        });
-        document.getElementById("grandTotalDisplay").textContent = "Total: " + total.toLocaleString() + " aUEC";
-      }
-
-      function createCargoRow(item, targetBody, itemPricesForItem) {
-        const row = document.createElement("tr");
-        row.style.backgroundColor = itemColors[item] || "#1e1e1e";
-
-        const itemCell = document.createElement("td");
-        itemCell.innerHTML = `<span class="highlighted-text">${item}</span>`;
-
-        const quantityCell = document.createElement("td");
-        const quantityInput = document.createElement("input");
-        quantityInput.type = "number";
-        quantityInput.min = 0;
-        quantityInput.value = "";
-        quantityCell.appendChild(quantityInput);
-
-        const locationCell = document.createElement("td");
-        const locationSelect = document.createElement("select");
-        const locations = Object.keys(itemPricesForItem);
-        locations.forEach(location => {
-          const option = document.createElement("option");
-          option.value = location;
-          option.textContent = location;
-          locationSelect.appendChild(option);
-        });
-
-        const scuTypeSelect = document.createElement("select");
-        ["scu", "cscu", "mscu"].forEach(type => {
-          const option = document.createElement("option");
-          option.value = type;
-          option.textContent = `per ${type.toUpperCase()}`;
-          scuTypeSelect.appendChild(option);
-        });
-
-        const unitPriceCell = document.createElement("td");
-        unitPriceCell.innerHTML = `<span class="highlighted-text">0</span>`;
-        unitPriceCell.appendChild(document.createElement("br"));
-        unitPriceCell.appendChild(scuTypeSelect);
-
-        const totalCell = document.createElement("td");
-        totalCell.innerHTML = `<span class="highlighted-text">0</span>`;
-
-        row.appendChild(itemCell);
-        row.appendChild(quantityCell);
-        row.appendChild(locationCell);
-        row.appendChild(unitPriceCell);
-        row.appendChild(totalCell);
-
-        row.querySelector("td:nth-child(3)").appendChild(locationSelect);
-
-        function updateRowTotals() {
-          const location = locationSelect.value;
-          const scuType = scuTypeSelect.value;
-          const priceObj = itemPricesForItem[location];
-          const unitPrice = priceObj?.[scuType] ?? 0;
-
-          unitPriceCell.querySelector("span").textContent = unitPrice.toLocaleString();
-          const quantity = parseFloat(quantityInput.value) || 0;
-          const total = quantity * unitPrice;
-          totalCell.querySelector("span").textContent = total.toLocaleString();
-
-          updateGrandTotal();
-        }
-
-        quantityInput.addEventListener("input", updateRowTotals);
-        locationSelect.addEventListener("change", updateRowTotals);
-        scuTypeSelect.addEventListener("change", updateRowTotals);
-
-        targetBody.appendChild(row);
-        updateRowTotals();
-      }
-
-      const categories = Object.keys(itemPrices);
-      categories.forEach(category => {
-        const targetBody =
-          category === "Ship Mining" ? shipMiningBody :
-          category === "Handheld and Light Ship Mining" ? handMiningBody :
-          category === "Salvage" ? salvageBody : null;
-
-        if (!targetBody) return;
-        const items = Object.keys(itemPrices[category]);
-        items.forEach(item => {
-          const itemPricesForItem = itemPrices[category][item];
-          createCargoRow(item, targetBody, itemPricesForItem);
+    function updateGrandTotal() {
+      let total = 0;
+      [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
+        Array.from(body.children).forEach(row => {
+          const value = parseFloat(row.children[4].querySelector("span").textContent.replace(/,/g, ""));
+          total += isNaN(value) ? 0 : value;
         });
       });
+      document.getElementById("grandTotalDisplay").textContent = "Total: " + total.toLocaleString() + " aUEC";
+    }
+
+    function createCargoRow(item, targetBody, itemPricesForItem) {
+      const row = document.createElement("tr");
+      row.style.backgroundColor = itemColors?.[item] || "#1e1e1e";
+
+      row.innerHTML = `
+        <td><span class="highlighted-text">${item}</span></td>
+        <td><input type="number" min="0" /></td>
+        <td><select></select></td>
+        <td><span class="highlighted-text">0</span><br/><select>
+          <option value="scu">per SCU</option>
+          <option value="cscu">per CSCU</option>
+          <option value="mscu">per MSCU</option>
+        </select></td>
+        <td><span class="highlighted-text">0</span></td>
+      `;
+
+      const quantityInput = row.querySelector("input");
+      const locationSelect = row.children[2].querySelector("select");
+      const scuTypeSelect = row.children[3].querySelector("select");
+      const unitPriceSpan = row.children[3].querySelector("span");
+      const totalSpan = row.children[4].querySelector("span");
+
+      Object.keys(itemPricesForItem).forEach(location => {
+        const opt = document.createElement("option");
+        opt.value = location;
+        opt.textContent = location;
+        locationSelect.appendChild(opt);
+      });
+
+      function updateRow() {
+        const location = locationSelect.value;
+        const scuType = scuTypeSelect.value;
+        const unitPrice = itemPricesForItem?.[location]?.[scuType] || 0;
+        const qty = parseFloat(quantityInput.value) || 0;
+        const total = qty * unitPrice;
+
+        unitPriceSpan.textContent = unitPrice.toLocaleString();
+        totalSpan.textContent = total.toLocaleString();
+        updateGrandTotal();
+      }
+
+      quantityInput.addEventListener("input", updateRow);
+      locationSelect.addEventListener("change", updateRow);
+      scuTypeSelect.addEventListener("change", updateRow);
+
+      targetBody.appendChild(row);
+      updateRow();
+    }
+
+    const categories = {
+      "Ship Mining": shipMiningBody,
+      "Handheld and Light Ship Mining": handMiningBody,
+      "Salvage": salvageBody
+    };
+
+    window.onload = () => {
+      for (const [category, body] of Object.entries(categories)) {
+        if (!itemPrices[category]) continue;
+        Object.keys(itemPrices[category]).forEach(item => {
+          createCargoRow(item, body, itemPrices[category][item]);
+        });
+      }
 
       document.getElementById("manifestTitle").addEventListener("input", () => {
         const title = document.getElementById("manifestTitle").value;
-        document.getElementById("manifestTitleDisplay").textContent = title.trim() !== "" ? title : "Cargo Manifest Calculator";
+        document.getElementById("manifestTitleDisplay").textContent = title || "Cargo Manifest Calculator";
       });
     };
 
-    function exportCSV() {
-      const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let csv = `Title:|${title}\nItem|Quantity|Location|Unit Price|Total\n`;
-      [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
-        Array.from(body.children).forEach(row => {
-          const item = row.children[0].innerText.trim();
-          const qty = row.children[1].querySelector("input").value;
-          const location = row.children[2].querySelector("select").value;
-          const unitPrice = row.children[3].querySelector("span").textContent;
-          const scuType = row.children[3].querySelector("select").value.toUpperCase();
-          const total = row.children[4].querySelector("span").textContent;
-          csv += `${item}|${qty}|${location}|${unitPrice} ${scuType}|${total}\n`;
-        });
-      });
-      downloadFile(csv, title.replace(/\s+/g, "_") + "_" + new Date().toISOString().slice(0,16).replace(/[:T]/g,"-") + ".csv");
-    }
-
     function exportTXT() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let txt = `==== ${title} ====\n`;
-      [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
-        Array.from(body.children).forEach(row => {
+      let txt = `Title: ${title}\n\n`;
+      let total = 0;
+
+      for (const [category, body] of Object.entries(categories)) {
+        const rows = Array.from(body.children);
+        if (rows.length === 0) continue;
+
+        txt += `Category: ${category}\n`;
+
+        rows.forEach(row => {
           const item = row.children[0].innerText.trim();
-          const qty = row.children[1].querySelector("input").value;
+          const qty = row.children[1].querySelector("input").value || "0";
           const location = row.children[2].querySelector("select").value;
           const unitPrice = row.children[3].querySelector("span").textContent;
-          const scuType = row.children[3].querySelector("select").value.toUpperCase();
-          const total = row.children[4].querySelector("span").textContent;
-          txt += `${item} x${qty} @ ${unitPrice} ${scuType} (${location}) = ${total}\n`;
+          const totalValue = row.children[4].querySelector("span").textContent;
+
+          txt += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${unitPrice} | Total: ${totalValue}\n`;
+          total += parseFloat(totalValue.replace(/,/g, "")) || 0;
         });
-      });
-      downloadFile(txt, title.replace(/\s+/g, "_") + "_" + new Date().toISOString().slice(0,16).replace(/[:T]/g,"-") + ".txt");
+
+        txt += "\n";
+      }
+
+      txt += `Grand Total: ${total.toLocaleString()}\n`;
+      downloadFile(txt, `${title.replace(/\s+/g, "_")}_${timestamp()}.txt`);
+    }
+
+    function exportCSV() {
+      // CSV format identical to TXT per your instruction
+      exportTXT(); // just reuses exportTXT()
     }
 
     function downloadFile(content, filename) {
@@ -297,6 +274,10 @@
       link.href = URL.createObjectURL(blob);
       link.download = filename;
       link.click();
+    }
+
+    function timestamp() {
+      return new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
     }
   </script>
 </body>
