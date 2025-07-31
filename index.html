@@ -255,9 +255,15 @@
     
         const items = itemPrices[category];
         for (const item in items) {
-          const row = createRow(category, item, items[item]);
-          body.appendChild(row);
+          const locations = items[item];
+          for (const location in locations) {
+            // Here, pass a priceData object with only this location and price, so dropdown will only have one location option
+            const priceObj = { [location]: locations[location] };
+            const row = createRow(category, item, priceObj);
+            body.appendChild(row);
+          }
         }
+
       }
     }
 
