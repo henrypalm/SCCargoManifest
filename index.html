@@ -275,22 +275,56 @@
 
     function exportCSV() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let csv = `Title:|${title}\nItem|Quantity|Location|Unit Price|Total\n`;
-      const shipMiningBody = document.getElementById("shipMiningBody");
-      const handMiningBody = document.getElementById("handMiningBody");
-      const salvageBody = document.getElementById("salvageBody");
-      [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
-        Array.from(body.children).forEach(row => {
-          const item = row.children[0].innerText.trim();
-          const qty = row.children[1].querySelector("input").value;
-          const location = row.children[2].querySelector("select").value;
-          const unitPrice = row.children[3].querySelector("span").textContent;
-          const scuType = row.children[3].querySelector("select").value.toUpperCase();
-          const total = row.children[4].querySelector("span").textContent;
-          csv += `${item}|${qty}|${location}|${unitPrice} ${scuType}|${total}\n`;
+      const unitType = document.getElementById("unitSelect")?.value || "SCU"; // Include selected unit type
+      let csv = `Title:|${title}\nUnit Type:|${unitType}\n\n`;
+    
+      const bodies = [
+        { label: "Ship Mining", body: document.getElementById("shipMiningBody") },
+        { label: "Handheld and Light Ship Mining", body: document.getElementById("handMiningBody") },
+        { label: "Salvage", body: document.getElementById("salvageBody") }
+      ];
+    
+      let grandTotal = 0;
+    
+      bodies.forEach(({ label, body }) => {
+        const rows = Array.from(body.children);
+        const hasRowsWithQuantity = rows.some(row => {
+          const qty = parseFloat(row.children[1].querySelector("input").value) || 0;
+          return qty > 0;
         });
+    
+        if (hasRowsWithQuantity) {
+          csv += `Category:|${label}\n`;
+          csv += `Item|Quantity|Location|Unit Price|Total\n`;
+    
+          rows.forEach(row => {
+            const item = row.children[0].innerText.trim();
+            const qty = row.children[1].querySelector("input").value;
+            if (!qty || qty === "0") return;
+    
+            const location = row.children[2].querySelector("select").value;
+            const unitPriceRaw = row.children[3].querySelector("span").textContent;
+            const totalRaw = row.children[4].querySelector("span").textContent;
+    
+            const parsedTotal = parseFloat(totalRaw.replace(/,/g, "")) || 0;
+            const formattedUnitPrice = parseFloat(unitPriceRaw.replace(/,/g, "")).toLocaleString();
+            const formattedTotal = parsedTotal.toLocaleString();
+    
+            csv += `"${item}"|${qty}|"${location}"|${formattedUnitPrice}|${formattedTotal}\n`;
+    
+            grandTotal += parsedTotal;
+          });
+    
+          csv += `\n`;
+        }
       });
-      downloadFile(csv, title.replace(/\s+/g, "_") + "_" + new Date().toISOString().slice(0,16).replace(/[:T]/g,"-") + ".csv");
+    
+      csv += `Grand Total:|${grandTotal.toLocaleString()}`;
+    
+      const filename = `${title.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-")}.csv`;
+      downloadFile(csv, filename);
+    
+      alert("Reminder: This CSV uses the pipe (|) character as delimiter.");
     }
 
     function copyToClipboard() {
