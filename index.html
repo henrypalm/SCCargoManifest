@@ -234,6 +234,10 @@
       });
     };
 
+    function formatNumberWithCommas(num) {
+      return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
     function exportTXT() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
       let content = `Title: ${title}\n\n`;
@@ -281,25 +285,21 @@
 
     function exportCSV() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let content = `Title: ${title}\n\n`;
-    
-      const headers = ["Category", "Item", "Qty", "Location", "Unit Price", "Total"];
-      content += headers.join("|") + "\n";
-    
+      let content = [["Category", "Item", "Qty", "Location", "Unit Price", "Total"]];
       let grandTotal = 0;
-    
+
       const bodies = [
         { name: "Ship Mining", body: shipMiningBody },
         { name: "Handheld and Light Ship Mining", body: handMiningBody },
         { name: "Salvage", body: salvageBody }
       ];
-    
+
       bodies.forEach(({ name, body }) => {
         const rows = Array.from(body.children).filter(row => {
           const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
           return qty > 0;
         });
-    
+
         rows.forEach(row => {
           const item = row.querySelector(".itemSelect").textContent;
           const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
@@ -307,32 +307,24 @@
           const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
           const total = qty * unitPrice;
           grandTotal += total;
-    
-          content += [name, item, qty, location, formatNumberWithCommas(unitPrice), formatNumberWithCommas(total)].join("|") + "\n";
+
+          content.push([name, item, qty, location, unitPrice, total]);
         });
       });
-    
-      content += `\nGrand Total||| | |${formatNumberWithCommas(grandTotal)}\n`;
-    
-      const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+
+      content.push(["", "", "", "", "Grand Total", grandTotal]);
+
+      // Convert array to CSV string with commas and proper quoting
+      const csvString = content.map(row =>
+        row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")
+      ).join("\n");
+
+      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
       link.click();
-    }
-
-    
-    function downloadFile(content, filename) {
-      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
-    }
-
-    function timestamp() {
-      return new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
     }
   </script>
 </body>
