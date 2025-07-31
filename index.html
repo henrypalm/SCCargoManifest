@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SC Cargo Manifest</title>
   <link rel="icon" href="logo.ico" type="image/x-icon" />
   <style>
@@ -13,25 +13,21 @@
       margin: 0;
       padding-bottom: 120px;
     }
-
     h1 {
       text-align: center;
       color: gold;
       padding-top: 1rem;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 1rem;
     }
-
     th, td {
       padding: 0.5rem;
       border-bottom: 1px solid #444;
       text-align: left;
     }
-
     input, select {
       background-color: #222;
       color: white;
@@ -40,13 +36,11 @@
       border-radius: 4px;
       width: 100%;
     }
-
     .highlighted-text {
       color: white;
       background-color: black;
       padding: 0 0.2em;
     }
-
     #exportBox {
       position: sticky;
       bottom: 0;
@@ -59,7 +53,6 @@
       gap: 1em;
       z-index: 999;
     }
-
     details {
       margin: 1rem;
       background: #1a1a1a;
@@ -67,20 +60,17 @@
       border-radius: 6px;
       padding: 0.5rem;
     }
-
     summary {
       font-weight: bold;
       font-size: 1.2rem;
       cursor: pointer;
       color: #0ff;
     }
-
     #grandTotalDisplay {
       font-size: 1.2rem;
       font-weight: bold;
       color: gold;
     }
-
     #manifestTitle {
       width: 50%;
       margin: 1rem auto;
@@ -151,21 +141,25 @@
     <div id="grandTotalDisplay">Total: 0 aUEC</div>
   </div>
 
+  <!-- Load your itemPrices.js and itemColors.js here -->
   <script src="itemPrices.js"></script>
   <script src="itemColors.js"></script>
   <script>
-    // Reference to the table bodies
     const shipMiningBody = document.getElementById("shipMiningBody");
     const handMiningBody = document.getElementById("handMiningBody");
     const salvageBody = document.getElementById("salvageBody");
-  
+
+    function formatNumberWithCommas(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
     function createRow(category, itemName, priceData) {
       const row = document.createElement("tr");
-    
+
       const itemCell = document.createElement("td");
       itemCell.textContent = itemName;
       itemCell.classList.add("itemSelect");
-    
+
       const quantityCell = document.createElement("td");
       const qtyInput = document.createElement("input");
       qtyInput.type = "number";
@@ -173,7 +167,7 @@
       qtyInput.value = "0";
       qtyInput.classList.add("quantityInput");
       quantityCell.appendChild(qtyInput);
-    
+
       const locationCell = document.createElement("td");
       const locSelect = document.createElement("select");
       locSelect.classList.add("locationSelect");
@@ -184,7 +178,7 @@
         locSelect.appendChild(option);
       }
       locationCell.appendChild(locSelect);
-    
+
       const unitTypeCell = document.createElement("td");
       const unitTypeSelect = document.createElement("select");
       ["scu", "cscu", "mscu"].forEach(unitType => {
@@ -194,42 +188,40 @@
         unitTypeSelect.appendChild(option);
       });
       unitTypeCell.appendChild(unitTypeSelect);
-    
+
       const unitPriceCell = document.createElement("td");
       unitPriceCell.classList.add("unitPrice");
-      unitPriceCell.textContent = formatNumberWithCommas(priceData[locSelect.value].scu);
-    
+
       const totalCell = document.createElement("td");
       totalCell.classList.add("totalCell");
       totalCell.textContent = "0";
-    
+
       row.append(itemCell, quantityCell, locationCell, unitTypeCell, unitPriceCell, totalCell);
-    
+
       function updateRowTotals() {
         const qty = parseFloat(qtyInput.value) || 0;
         const location = locSelect.value;
         const unitType = unitTypeSelect.value;
         const prices = priceData[location] || { scu: 0, cscu: 0, mscu: 0 };
         const unitPrice = prices[unitType] || 0;
-    
+
         unitPriceCell.textContent = formatNumberWithCommas(unitPrice);
         const total = qty * unitPrice;
         totalCell.textContent = formatNumberWithCommas(total);
-    
+
         updateGrandTotal();
       }
-    
+
       qtyInput.addEventListener("input", updateRowTotals);
       locSelect.addEventListener("change", updateRowTotals);
       unitTypeSelect.addEventListener("change", updateRowTotals);
-    
-      // initialize
+
+      // Initialize display
       updateRowTotals();
-    
+
       return row;
     }
 
-  
     function updateGrandTotal() {
       const allRows = document.querySelectorAll("tbody tr");
       let grandTotal = 0;
@@ -242,7 +234,7 @@
       });
       document.getElementById("grandTotalDisplay").textContent = "Total: " + formatNumberWithCommas(grandTotal) + " aUEC";
     }
-  
+
     function populateTables() {
       for (const category in itemPrices) {
         const body =
@@ -250,26 +242,30 @@
           category === "Handheld and Light Ship Mining" ? handMiningBody :
           category === "Salvage" ? salvageBody :
           null;
-    
+
         if (!body) continue;
-    
+
         const items = itemPrices[category];
         for (const item in items) {
           const locations = items[item];
-          for (const location in locations) {
-            // Here, pass a priceData object with only this location and price, so dropdown will only have one location option
-            const priceObj = { [location]: locations[location] };
-            const row = createRow(category, item, priceObj);
-            body.appendChild(row);
-          }
+          const row = createRow(category, item, locations);
+          body.appendChild(row);
         }
-
       }
     }
 
-  
     populateTables();
-  </script>
 
+    // Placeholder functions for export and copy (implement as needed)
+    function exportCSV() {
+      alert("Export CSV clicked - implement as needed.");
+    }
+    function exportTXT() {
+      alert("Export TXT clicked - implement as needed.");
+    }
+    function copyTXT() {
+      alert("Copy TXT clicked - implement as needed.");
+    }
+  </script>
 </body>
 </html>
