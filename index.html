@@ -154,118 +154,115 @@
   <script src="itemPrices.js"></script>
   <script src="itemColors.js"></script>
   <script>
-    function formatNumberWithCommas(num) {
-      return num.toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-      });
-    }
+    // Reference to the table bodies
+    const shipMiningBody = document.getElementById("shipMiningBody");
+    const handMiningBody = document.getElementById("handMiningBody");
+    const salvageBody = document.getElementById("salvageBody");
   
-    function generateTXTContent() {
-      const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let content = `Title: ${title}\n\n`;
+    function createRow(category, itemName, priceData) {
+      const row = document.createElement("tr");
+    
+      const itemCell = document.createElement("td");
+      itemCell.textContent = itemName;
+      itemCell.classList.add("itemSelect");
+    
+      const quantityCell = document.createElement("td");
+      const qtyInput = document.createElement("input");
+      qtyInput.type = "number";
+      qtyInput.min = "0";
+      qtyInput.value = "0";
+      qtyInput.classList.add("quantityInput");
+      quantityCell.appendChild(qtyInput);
+    
+      const locationCell = document.createElement("td");
+      const locSelect = document.createElement("select");
+      locSelect.classList.add("locationSelect");
+      for (const location in priceData) {
+        const option = document.createElement("option");
+        option.value = location;
+        option.textContent = location;
+        locSelect.appendChild(option);
+      }
+      locationCell.appendChild(locSelect);
+    
+      const unitTypeCell = document.createElement("td");
+      const unitTypeSelect = document.createElement("select");
+      ["scu", "cscu", "mscu"].forEach(unitType => {
+        const option = document.createElement("option");
+        option.value = unitType;
+        option.textContent = unitType.toUpperCase();
+        unitTypeSelect.appendChild(option);
+      });
+      unitTypeCell.appendChild(unitTypeSelect);
+    
+      const unitPriceCell = document.createElement("td");
+      unitPriceCell.classList.add("unitPrice");
+      unitPriceCell.textContent = formatNumberWithCommas(priceData[locSelect.value].scu);
+    
+      const totalCell = document.createElement("td");
+      totalCell.classList.add("totalCell");
+      totalCell.textContent = "0";
+    
+      row.append(itemCell, quantityCell, locationCell, unitTypeCell, unitPriceCell, totalCell);
+    
+      function updateRowTotals() {
+        const qty = parseFloat(qtyInput.value) || 0;
+        const location = locSelect.value;
+        const unitType = unitTypeSelect.value;
+        const prices = priceData[location] || { scu: 0, cscu: 0, mscu: 0 };
+        const unitPrice = prices[unitType] || 0;
+    
+        unitPriceCell.textContent = formatNumberWithCommas(unitPrice);
+        const total = qty * unitPrice;
+        totalCell.textContent = formatNumberWithCommas(total);
+    
+        updateGrandTotal();
+      }
+    
+      qtyInput.addEventListener("input", updateRowTotals);
+      locSelect.addEventListener("change", updateRowTotals);
+      unitTypeSelect.addEventListener("change", updateRowTotals);
+    
+      // initialize
+      updateRowTotals();
+    
+      return row;
+    }
+
+  
+    function updateGrandTotal() {
+      const allRows = document.querySelectorAll("tbody tr");
       let grandTotal = 0;
-  
-      const bodies = [
-        { name: "Ship Mining", body: shipMiningBody },
-        { name: "Handheld and Light Ship Mining", body: handMiningBody },
-        { name: "Salvage", body: salvageBody }
-      ];
-  
-      bodies.forEach(({ name, body }) => {
-        const rows = Array.from(body.children).filter(row => {
-          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
-          return qty > 0;
-        });
-  
-        if (rows.length === 0) return;
-  
-        content += `Category: ${name}\n`;
-  
-        rows.forEach(row => {
-          const item = row.querySelector(".itemSelect").textContent;
-          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
-          const location = row.querySelector(".locationSelect").value;
-          const scuSize = row.querySelector(".scuSelect").value;
-          const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
-          const total = qty * unitPrice;
+      allRows.forEach(row => {
+        const totalCell = row.querySelector(".totalCell");
+        if (totalCell) {
+          const total = parseFloat(totalCell.textContent.replace(/,/g, '')) || 0;
           grandTotal += total;
-  
-          content += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${formatNumberWithCommas(unitPrice)} aUEC (${scuSize.toUpperCase()}) | Total: ${formatNumberWithCommas(total)}\n`;
-        });
-  
-        content += `\n`;
+        }
       });
-  
-      content += `Grand Total: ${formatNumberWithCommas(grandTotal)} aUEC\n`;
-      return content;
+      document.getElementById("grandTotalDisplay").textContent = "Total: " + formatNumberWithCommas(grandTotal) + " aUEC";
     }
   
-    function exportTXT() {
-      const content = generateTXTContent();
-      const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    function populateTables() {
+      for (const category in itemPrices) {
+        const body =
+          category === "Ship Mining" ? shipMiningBody :
+          category === "Hand Mining" ? handMiningBody :
+          category === "Salvage" ? salvageBody :
+          null;
+  
+        if (!body) continue;
+  
+        const items = itemPrices[category];
+        for (const item in items) {
+          const row = createRow(category, item, items[item]);
+          body.appendChild(row);
+        }
+      }
     }
   
-    function copyTXT() {
-      const content = generateTXTContent();
-      navigator.clipboard.writeText(content)
-        .then(() => alert("TXT content copied to clipboard!"))
-        .catch(err => alert("Copy failed: " + err));
-    }
-  
-    function exportCSV() {
-      const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let content = [["Category", "Item", "Qty", "Location", "Unit Price", "SCU Size", "Total"]];
-      let grandTotal = 0;
-  
-      const bodies = [
-        { name: "Ship Mining", body: shipMiningBody },
-        { name: "Handheld and Light Ship Mining", body: handMiningBody },
-        { name: "Salvage", body: salvageBody }
-      ];
-  
-      bodies.forEach(({ name, body }) => {
-        const rows = Array.from(body.children).filter(row => {
-          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
-          return qty > 0;
-        });
-  
-        rows.forEach(row => {
-          const item = row.querySelector(".itemSelect").textContent;
-          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
-          const location = row.querySelector(".locationSelect").value;
-          const scuSize = row.querySelector(".scuSelect").value;
-          const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
-          const total = qty * unitPrice;
-          grandTotal += total;
-  
-          content.push([name, item, qty, location, unitPrice, scuSize.toUpperCase(), total]);
-        });
-      });
-  
-      content.push(["", "", "", "", "", "Grand Total", grandTotal]);
-  
-      const csvString = content.map(row =>
-        row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")
-      ).join("\n");
-  
-      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    populateTables();
   </script>
+
 </body>
 </html>
