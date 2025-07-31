@@ -234,98 +234,105 @@
       });
     };
 
-    function formatNumberWithCommas(num) {
-      return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-    }
+        function formatNumberWithCommas(num) {
+          return num.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          });
+        }
+    
+        function exportTXT() {
+          const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
+          let content = `Title: ${title}\n\n`;
+          let grandTotal = 0;
+    
+          const bodies = [
+            { name: "Ship Mining", body: shipMiningBody },
+            { name: "Handheld and Light Ship Mining", body: handMiningBody },
+            { name: "Salvage", body: salvageBody }
+          ];
+    
+          bodies.forEach(({ name, body }) => {
+            const rows = Array.from(body.children).filter(row => {
+              const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
+              return qty > 0;
+            });
+    
+            if (rows.length === 0) return;
+    
+            content += `Category: ${name}\n`;
+    
+            rows.forEach(row => {
+              const item = row.querySelector(".itemSelect").textContent;
+              const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
+              const location = row.querySelector(".locationSelect").value;
+              const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
+              const total = qty * unitPrice;
+              grandTotal += total;
+    
+              content += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${formatNumberWithCommas(unitPrice)} | Total: ${formatNumberWithCommas(total)}\n`;
+            });
+    
+            content += `\n`;
+          });
+    
+          content += `Grand Total: ${formatNumberWithCommas(grandTotal)}\n`;
+    
+          const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+          link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.txt`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+    
+        function exportCSV() {
+          const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
+          let content = [["Category", "Item", "Qty", "Location", "Unit Price", "Total"]];
+          let grandTotal = 0;
+    
+          const bodies = [
+            { name: "Ship Mining", body: shipMiningBody },
+            { name: "Handheld and Light Ship Mining", body: handMiningBody },
+            { name: "Salvage", body: salvageBody }
+          ];
+    
+          bodies.forEach(({ name, body }) => {
+            const rows = Array.from(body.children).filter(row => {
+              const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
+              return qty > 0;
+            });
+    
+            rows.forEach(row => {
+              const item = row.querySelector(".itemSelect").textContent;
+              const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
+              const location = row.querySelector(".locationSelect").value;
+              const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
+              const total = qty * unitPrice;
+              grandTotal += total;
+    
+              content.push([name, item, qty, location, unitPrice, total]);
+            });
+          });
+    
+          content.push(["", "", "", "", "Grand Total", grandTotal]);
+    
+          const csvString = content.map(row =>
+            row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")
+          ).join("\n");
+    
+          const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+          link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
 
-    function exportTXT() {
-      const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let content = `Title: ${title}\n\n`;
-      let grandTotal = 0;
-
-      const bodies = [
-        { name: "Ship Mining", body: shipMiningBody },
-        { name: "Handheld and Light Ship Mining", body: handMiningBody },
-        { name: "Salvage", body: salvageBody }
-      ];
-
-      bodies.forEach(({ name, body }) => {
-        const rows = Array.from(body.children).filter(row => {
-          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
-          return qty > 0;
-        });
-
-        if (rows.length === 0) return;
-
-        content += `Category: ${name}\n`;
-
-        rows.forEach(row => {
-          const item = row.querySelector(".itemSelect").textContent;
-          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
-          const location = row.querySelector(".locationSelect").value;
-          const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
-          const total = qty * unitPrice;
-          grandTotal += total;
-
-          content += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${formatNumberWithCommas(unitPrice)} | Total: ${formatNumberWithCommas(total)}\n`;
-        });
-
-        content += `\n`;
-      });
-
-      content += `Grand Total: ${formatNumberWithCommas(grandTotal)}\n`;
-
-      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.txt`;
-      link.click();
-    }
-
-    function exportCSV() {
-      const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let content = [["Category", "Item", "Qty", "Location", "Unit Price", "Total"]];
-      let grandTotal = 0;
-
-      const bodies = [
-        { name: "Ship Mining", body: shipMiningBody },
-        { name: "Handheld and Light Ship Mining", body: handMiningBody },
-        { name: "Salvage", body: salvageBody }
-      ];
-
-      bodies.forEach(({ name, body }) => {
-        const rows = Array.from(body.children).filter(row => {
-          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
-          return qty > 0;
-        });
-
-        rows.forEach(row => {
-          const item = row.querySelector(".itemSelect").textContent;
-          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
-          const location = row.querySelector(".locationSelect").value;
-          const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
-          const total = qty * unitPrice;
-          grandTotal += total;
-
-          content.push([name, item, qty, location, unitPrice, total]);
-        });
-      });
-
-      content.push(["", "", "", "", "Grand Total", grandTotal]);
-
-      // Convert array to CSV string with commas and proper quoting
-      const csvString = content.map(row =>
-        row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")
-      ).join("\n");
-
-      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
-      link.click();
-    }
   </script>
 </body>
 </html>
