@@ -170,15 +170,15 @@
       row.style.backgroundColor = itemColors?.[item] || "#1e1e1e";
 
       row.innerHTML = `
-        <td><span class="highlighted-text">${item}</span></td>
-        <td><input type="number" min="0" /></td>
-        <td><select></select></td>
-        <td><span class="highlighted-text">0</span><br/><select>
+        <td><span class="highlighted-text itemSelect">${item}</span></td>
+        <td><input type="number" min="0" class="quantityInput" /></td>
+        <td><select class="locationSelect"></select></td>
+        <td><span class="highlighted-text unitPrice">0</span><br/><select class="scuSelect">
           <option value="scu">per SCU</option>
           <option value="cscu">per CSCU</option>
           <option value="mscu">per MSCU</option>
         </select></td>
-        <td><span class="highlighted-text">0</span></td>
+        <td><span class="highlighted-text totalCell">0</span></td>
       `;
 
       const quantityInput = row.querySelector("input");
@@ -236,38 +236,93 @@
 
     function exportTXT() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let txt = `Title: ${title}\n\n`;
-      let total = 0;
+      let content = `Title: ${title}\n\n`;
+      let grandTotal = 0;
 
-      for (const [category, body] of Object.entries(categories)) {
-        const rows = Array.from(body.children);
-        if (rows.length === 0) continue;
+      const bodies = [
+        { name: "Ship Mining", body: shipMiningBody },
+        { name: "Handheld and Light Ship Mining", body: handMiningBody },
+        { name: "Salvage", body: salvageBody }
+      ];
 
-        txt += `Category: ${category}\n`;
-
-        rows.forEach(row => {
-          const item = row.children[0].innerText.trim();
-          const qty = row.children[1].querySelector("input").value || "0";
-          const location = row.children[2].querySelector("select").value;
-          const unitPrice = row.children[3].querySelector("span").textContent;
-          const totalValue = row.children[4].querySelector("span").textContent;
-
-          txt += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${unitPrice} | Total: ${totalValue}\n`;
-          total += parseFloat(totalValue.replace(/,/g, "")) || 0;
+      bodies.forEach(({ name, body }) => {
+        const rows = Array.from(body.children).filter(row => {
+          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
+          return qty > 0;
         });
 
-        txt += "\n";
-      }
+        if (rows.length === 0) return;
 
-      txt += `Grand Total: ${total.toLocaleString()}\n`;
-      downloadFile(txt, `${title.replace(/\s+/g, "_")}_${timestamp()}.txt`);
+        content += `Category: ${name}\n`;
+
+        rows.forEach(row => {
+          const item = row.querySelector(".itemSelect").textContent;
+          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
+          const location = row.querySelector(".locationSelect").value;
+          const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
+          const total = qty * unitPrice;
+          grandTotal += total;
+
+          content += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${formatNumberWithCommas(unitPrice)} | Total: ${formatNumberWithCommas(total)}\n`;
+        });
+
+        content += `\n`;
+      });
+
+      content += `Grand Total: ${formatNumberWithCommas(grandTotal)}\n`;
+
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.txt`;
+      link.click();
     }
 
     function exportCSV() {
-      // CSV format identical to TXT per your instruction
-      exportTXT(); // just reuses exportTXT()
+      const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
+      let content = `Title: ${title}\n\n`;
+    
+      const headers = ["Category", "Item", "Qty", "Location", "Unit Price", "Total"];
+      content += headers.join("|") + "\n";
+    
+      let grandTotal = 0;
+    
+      const bodies = [
+        { name: "Ship Mining", body: shipMiningBody },
+        { name: "Handheld and Light Ship Mining", body: handMiningBody },
+        { name: "Salvage", body: salvageBody }
+      ];
+    
+      bodies.forEach(({ name, body }) => {
+        const rows = Array.from(body.children).filter(row => {
+          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
+          return qty > 0;
+        });
+    
+        rows.forEach(row => {
+          const item = row.querySelector(".itemSelect").textContent;
+          const qty = parseFloat(row.querySelector(".quantityInput").value) || 0;
+          const location = row.querySelector(".locationSelect").value;
+          const unitPrice = parseFloat(row.querySelector(".unitPrice").textContent.replace(/,/g, '')) || 0;
+          const total = qty * unitPrice;
+          grandTotal += total;
+    
+          content += [name, item, qty, location, formatNumberWithCommas(unitPrice), formatNumberWithCommas(total)].join("|") + "\n";
+        });
+      });
+    
+      content += `\nGrand Total||| | |${formatNumberWithCommas(grandTotal)}\n`;
+    
+      const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      link.download = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
+      link.click();
     }
 
+    
     function downloadFile(content, filename) {
       const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
       const link = document.createElement("a");
