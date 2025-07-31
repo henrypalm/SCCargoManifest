@@ -166,7 +166,7 @@ const itemPrices = {
   },
   "Handheld and Light Ship Mining": {
     "Janalite" : {
-      "No Location data": { scu: 123, cscu: 1, mscu: 1 }
+      "Seraphim Station, Crusder, Stanton" : { SCU: 18559790 }
     },
     "Hadanite" : {
       "No Location data": { scu: 123, cscu: 1, mscu: 1 }
