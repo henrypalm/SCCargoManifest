@@ -340,7 +340,7 @@
 
     function copyToClipboard() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let txt = `Title: ${title}\n\n`;
+      let textToCopy = `Title: ${title}\n\n`;
     
       const bodies = [
         { label: "Ship Mining", body: document.getElementById("shipMiningBody") },
@@ -357,7 +357,7 @@
         });
     
         if (hasRows) {
-          txt += `Category: ${label}\n`;
+          textToCopy += `Category: ${label}\n`;
     
           Array.from(body.children).forEach(row => {
             const item = row.children[0].innerText.trim();
@@ -369,16 +369,23 @@
             const total = row.children[4].querySelector("span").textContent;
             const parsedTotal = parseFloat(total.replace(/,/g, "")) || 0;
     
-            txt += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${unitPrice} | Total: ${total}\n`;
+            textToCopy += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${unitPrice} | Total: ${total}\n`;
             grandTotal += parsedTotal;
           });
     
-          txt += "\n";
+          textToCopy += "\n";
         }
       });
     
-      txt += `Grand Total: ${grandTotal.toLocaleString()}`;
+      textToCopy += `Grand Total: ${grandTotal.toLocaleString()}`;
+    
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert("Manifest copied to clipboard!");
+      }).catch(() => {
+        alert("Failed to copy. Please try again.");
+      });
     }
+
 
     function downloadFile(content, filename) {
       const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
