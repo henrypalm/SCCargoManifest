@@ -9,335 +9,294 @@
     body {
       font-family: Arial, sans-serif;
       background-color: #111;
-      color: #eee;
-      margin: 20px;
-      padding-bottom: 140px; /* for sticky footer space */
+      color: white;
+      margin: 0;
+      padding-bottom: 120px;
     }
 
-    input, select {
-      padding: 5px;
-      border-radius: 5px;
-      border: 1px solid #555;
-      background-color: #222;
-      color: #eee;
+    h1 {
+      text-align: center;
+      color: gold;
+      padding-top: 1rem;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 1rem;
     }
 
     th, td {
-      padding: 10px;
-      border: 1px solid #444;
-      text-align: center;
+      padding: 0.5rem;
+      border-bottom: 1px solid #444;
+      text-align: left;
     }
 
-    th {
+    input, select {
       background-color: #222;
-    }
-
-    button {
-      padding: 10px 15px;
-      margin-right: 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: #28a745;
       color: white;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #218838;
+      border: 1px solid #444;
+      padding: 0.3rem;
+      border-radius: 4px;
+      width: 100%;
     }
 
     .highlighted-text {
       color: white;
       background-color: black;
-      padding: 2px 4px;
-      border-radius: 3px;
-      display: inline-block;
-      min-width: 40px;
-    }
-
-    summary {
-      font-size: 1.2em;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 0.3em 0;
-      color: gold;
-    }
-
-    details {
-      margin-top: 30px;
-      border: 1px solid #444;
-      padding: 10px;
-      border-radius: 6px;
-      background-color: #1a1a1a;
-    }
-
-    #manifestTitle {
-      width: 300px;
-    }
-
-    #manifestTitleDisplay {
-      margin-bottom: 10px;
+      padding: 0 0.2em;
     }
 
     #exportBox {
       position: sticky;
       bottom: 0;
-      background-color: #222;
+      background: #222;
       padding: 1em;
+      border-top: 2px solid #555;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      border-top: 2px solid #555;
+      flex-wrap: wrap;
+      gap: 1em;
       z-index: 999;
-      width: 100%;
-      box-sizing: border-box;
+    }
+
+    details {
+      margin: 1rem;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 0.5rem;
+    }
+
+    summary {
+      font-weight: bold;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #0ff;
     }
 
     #grandTotalDisplay {
-      font-size: 1.2em;
+      font-size: 1.2rem;
       font-weight: bold;
-      color: #FFD700;
+      color: gold;
+    }
+
+    #manifestTitle {
+      width: 50%;
+      margin: 1rem auto;
+      display: block;
+      font-size: 1.2rem;
     }
   </style>
 </head>
 <body>
-
-  <h2 id="manifestTitleDisplay">Cargo Manifest Calculator</h2>
-  <label for="manifestTitle"><strong>Manifest Title:</strong></label>
   <input type="text" id="manifestTitle" placeholder="Enter manifest title..." />
+  <h1 id="manifestTitleDisplay">Cargo Manifest Calculator</h1>
 
-  <!-- Collapsible: Ship Mining -->
   <details open>
     <summary>Ship Mining</summary>
     <table>
       <thead>
         <tr>
-          <th><span class="highlighted-text">Item</span></th>
-          <th><span class="highlighted-text">Quantity</span></th>
-          <th><span class="highlighted-text">Location</span></th>
-          <th><span class="highlighted-text">Unit Price Per SCU</span></th>
-          <th><span class="highlighted-text">Total</span></th>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Location</th>
+          <th>Unit Price<br>(choose size)</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody id="shipMiningBody"></tbody>
     </table>
   </details>
 
-  <!-- Collapsible: Handheld and Light Ship Mining -->
   <details open>
-    <summary>Handheld and Light Ship Mining</summary>
+    <summary>Hand Mining</summary>
     <table>
       <thead>
         <tr>
-          <th><span class="highlighted-text">Item</span></th>
-          <th><span class="highlighted-text">Quantity</span></th>
-          <th><span class="highlighted-text">Location</span></th>
-          <th><span class="highlighted-text">Unit Price Per SCU</span></th>
-          <th><span class="highlighted-text">Total</span></th>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Location</th>
+          <th>Unit Price<br>(choose size)</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody id="handMiningBody"></tbody>
     </table>
   </details>
 
-  <!-- Collapsible: Salvage -->
   <details open>
     <summary>Salvage</summary>
     <table>
       <thead>
         <tr>
-          <th><span class="highlighted-text">Item</span></th>
-          <th><span class="highlighted-text">Quantity</span></th>
-          <th><span class="highlighted-text">Location</span></th>
-          <th><span class="highlighted-text">Unit Price Per SCU</span></th>
-          <th><span class="highlighted-text">Total</span></th>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Location</th>
+          <th>Unit Price<br>(choose size)</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody id="salvageBody"></tbody>
     </table>
   </details>
 
-  <!-- Sticky Export and Grand Total -->
   <div id="exportBox">
-    <div>
-      <button onclick="exportCSV()">Export CSV</button>
-      <button onclick="exportTXT()">Export TXT</button>
-    </div>
-    <div id="grandTotalDisplay">Grand Total: 0</div>
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="exportTXT()">Export TXT</button>
+    <div id="grandTotalDisplay">Total: 0 aUEC</div>
   </div>
 
   <script src="itemPrices.js"></script>
   <script src="itemColors.js"></script>
-
-  <!-- Your existing JS logic -->
   <script>
-    const categories = Object.keys(itemPrices);
-    const shipMiningBody = document.getElementById("shipMiningBody");
-    const handMiningBody = document.getElementById("handMiningBody");
-    const salvageBody = document.getElementById("salvageBody");
+    window.onload = function () {
+      const shipMiningBody = document.getElementById("shipMiningBody");
+      const handMiningBody = document.getElementById("handMiningBody");
+      const salvageBody = document.getElementById("salvageBody");
 
-    function updateGrandTotal() {
-      let grandTotal = 0;
-      document.querySelectorAll("tbody").forEach(body => {
-        body.querySelectorAll("tr").forEach(row => {
-          const totalCell = row.children[4].querySelector(".highlighted-text");
-          const total = parseFloat(totalCell?.textContent.replace(/,/g, '')) || 0;
-          grandTotal += total;
+      function updateGrandTotal() {
+        let total = 0;
+        [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
+          Array.from(body.children).forEach(row => {
+            const value = parseFloat(row.children[4].querySelector("span").textContent.replace(/,/g, ""));
+            total += isNaN(value) ? 0 : value;
+          });
         });
-      });
-      document.getElementById("grandTotalDisplay").textContent = "Grand Total: " + grandTotal.toLocaleString();
-    }
-
-    function createCargoRow(item, targetBody, itemPricesForItem) {
-      const row = document.createElement("tr");
-      row.style.backgroundColor = itemColors[item] || "#1e1e1e";
-
-      const itemCell = document.createElement("td");
-      itemCell.innerHTML = `<span class="highlighted-text">${item}</span>`;
-
-      const quantityCell = document.createElement("td");
-      const quantityInput = document.createElement("input");
-      quantityInput.type = "number";
-      quantityInput.min = 0;
-      quantityInput.value = "";
-      quantityCell.appendChild(quantityInput);
-
-      const locationCell = document.createElement("td");
-      const locationSelect = document.createElement("select");
-      Object.keys(itemPricesForItem).forEach(location => {
-        const option = document.createElement("option");
-        option.value = location;
-        option.textContent = location;
-        locationSelect.appendChild(option);
-      });
-      locationCell.appendChild(locationSelect);
-
-      const priceCell = document.createElement("td");
-      priceCell.innerHTML = `<span class="highlighted-text">0</span>`;
-
-      const totalCell = document.createElement("td");
-      totalCell.innerHTML = `<span class="highlighted-text">0</span>`;
-
-      row.appendChild(itemCell);
-      row.appendChild(quantityCell);
-      row.appendChild(locationCell);
-      row.appendChild(priceCell);
-      row.appendChild(totalCell);
-
-      function updateRowTotals() {
-        const location = locationSelect.value;
-        const unitPrice = itemPricesForItem[location] || 0;
-        priceCell.innerHTML = `<span class="highlighted-text">${unitPrice.toLocaleString()}</span>`;
-        const total = quantityInput.value * unitPrice;
-        totalCell.innerHTML = `<span class="highlighted-text">${total.toLocaleString()}</span>`;
-        updateGrandTotal();
+        document.getElementById("grandTotalDisplay").textContent = "Total: " + total.toLocaleString() + " aUEC";
       }
 
-      quantityInput.addEventListener("input", updateRowTotals);
-      locationSelect.addEventListener("change", updateRowTotals);
+      function createCargoRow(item, targetBody, itemPricesForItem) {
+        const row = document.createElement("tr");
+        row.style.backgroundColor = itemColors[item] || "#1e1e1e";
 
-      targetBody.appendChild(row);
-      updateRowTotals();
-    }
+        const itemCell = document.createElement("td");
+        itemCell.innerHTML = `<span class="highlighted-text">${item}</span>`;
 
-    shipMiningBody.innerHTML = "";
-    handMiningBody.innerHTML = "";
-    salvageBody.innerHTML = "";
+        const quantityCell = document.createElement("td");
+        const quantityInput = document.createElement("input");
+        quantityInput.type = "number";
+        quantityInput.min = 0;
+        quantityInput.value = "";
+        quantityCell.appendChild(quantityInput);
 
-    categories.forEach(category => {
-      const targetBody =
-        category === "Ship Mining" ? shipMiningBody :
-        category === "Handheld and Light Ship Mining" ? handMiningBody :
-        category === "Salvage" ? salvageBody :
-        null;
+        const locationCell = document.createElement("td");
+        const locationSelect = document.createElement("select");
+        const locations = Object.keys(itemPricesForItem);
+        locations.forEach(location => {
+          const option = document.createElement("option");
+          option.value = location;
+          option.textContent = location;
+          locationSelect.appendChild(option);
+        });
 
-      if (!targetBody) return;
-      const items = Object.keys(itemPrices[category]);
-      items.forEach(item => {
-        const itemPricesForItem = itemPrices[category][item];
-        createCargoRow(item, targetBody, itemPricesForItem);
+        const scuTypeSelect = document.createElement("select");
+        ["scu", "cscu", "mscu"].forEach(type => {
+          const option = document.createElement("option");
+          option.value = type;
+          option.textContent = `per ${type.toUpperCase()}`;
+          scuTypeSelect.appendChild(option);
+        });
+
+        const unitPriceCell = document.createElement("td");
+        unitPriceCell.innerHTML = `<span class="highlighted-text">0</span>`;
+        unitPriceCell.appendChild(document.createElement("br"));
+        unitPriceCell.appendChild(scuTypeSelect);
+
+        const totalCell = document.createElement("td");
+        totalCell.innerHTML = `<span class="highlighted-text">0</span>`;
+
+        row.appendChild(itemCell);
+        row.appendChild(quantityCell);
+        row.appendChild(locationCell);
+        row.appendChild(unitPriceCell);
+        row.appendChild(totalCell);
+
+        row.querySelector("td:nth-child(3)").appendChild(locationSelect);
+
+        function updateRowTotals() {
+          const location = locationSelect.value;
+          const scuType = scuTypeSelect.value;
+          const priceObj = itemPricesForItem[location];
+          const unitPrice = priceObj?.[scuType] ?? 0;
+
+          unitPriceCell.querySelector("span").textContent = unitPrice.toLocaleString();
+          const quantity = parseFloat(quantityInput.value) || 0;
+          const total = quantity * unitPrice;
+          totalCell.querySelector("span").textContent = total.toLocaleString();
+
+          updateGrandTotal();
+        }
+
+        quantityInput.addEventListener("input", updateRowTotals);
+        locationSelect.addEventListener("change", updateRowTotals);
+        scuTypeSelect.addEventListener("change", updateRowTotals);
+
+        targetBody.appendChild(row);
+        updateRowTotals();
+      }
+
+      const categories = Object.keys(itemPrices);
+      categories.forEach(category => {
+        const targetBody =
+          category === "Ship Mining" ? shipMiningBody :
+          category === "Handheld and Light Ship Mining" ? handMiningBody :
+          category === "Salvage" ? salvageBody : null;
+
+        if (!targetBody) return;
+        const items = Object.keys(itemPrices[category]);
+        items.forEach(item => {
+          const itemPricesForItem = itemPrices[category][item];
+          createCargoRow(item, targetBody, itemPricesForItem);
+        });
       });
-    });
 
-    document.getElementById("manifestTitle").addEventListener("input", () => {
-      const title = document.getElementById("manifestTitle").value;
-      document.getElementById("manifestTitleDisplay").textContent = title.trim() !== "" ? title : "Cargo Manifest Calculator";
-    });
-
-    function downloadFile(content, filename) {
-      const blob = new Blob([content], { type: "text/plain" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+      document.getElementById("manifestTitle").addEventListener("input", () => {
+        const title = document.getElementById("manifestTitle").value;
+        document.getElementById("manifestTitleDisplay").textContent = title.trim() !== "" ? title : "Cargo Manifest Calculator";
+      });
+    };
 
     function exportCSV() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let csv = `Title:|${title}\nCategory|Item|Quantity|Location|Unit Price|Total\n`;
-      const categoryMap = {
-        shipMiningBody: "Ship Mining",
-        handMiningBody: "Handheld and Light Ship Mining",
-        salvageBody: "Salvage"
-      };
-
+      let csv = `Title:|${title}\nItem|Quantity|Location|Unit Price|Total\n`;
       [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
-        const category = categoryMap[body.id];
-        body.querySelectorAll("tr").forEach(row => {
-          const item = row.children[0].textContent.trim();
-          const qty = row.children[1].firstChild.value.trim();
-          if (!qty || Number(qty) === 0) return;
-          const location = row.children[2].firstChild.value.trim();
-          const price = row.children[3].querySelector(".highlighted-text").textContent.trim();
-          const total = row.children[4].querySelector(".highlighted-text").textContent.trim();
-          csv += `${category}|${item}|${qty}|${location}|${price}|${total}\n`;
+        Array.from(body.children).forEach(row => {
+          const item = row.children[0].innerText.trim();
+          const qty = row.children[1].querySelector("input").value;
+          const location = row.children[2].querySelector("select").value;
+          const unitPrice = row.children[3].querySelector("span").textContent;
+          const scuType = row.children[3].querySelector("select").value.toUpperCase();
+          const total = row.children[4].querySelector("span").textContent;
+          csv += `${item}|${qty}|${location}|${unitPrice} ${scuType}|${total}\n`;
         });
       });
-
-      csv += `\nGrand Total:|${document.getElementById("grandTotalDisplay").textContent.split(": ")[1]}`;
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.csv`;
-      downloadFile(csv, filename);
-      alert("Reminder: When opening the CSV file, set the pipe | as the delimiter.");
+      downloadFile(csv, title.replace(/\s+/g, "_") + "_" + new Date().toISOString().slice(0,16).replace(/[:T]/g,"-") + ".csv");
     }
 
     function exportTXT() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let txt = `Title: ${title}\n\n`;
-      const categoryMap = {
-        shipMiningBody: "Ship Mining",
-        handMiningBody: "Handheld and Light Ship Mining",
-        salvageBody: "Salvage"
-      };
-
+      let txt = `==== ${title} ====\n`;
       [shipMiningBody, handMiningBody, salvageBody].forEach(body => {
-        const category = categoryMap[body.id];
-        txt += `Category: ${category}\n`;
-        body.querySelectorAll("tr").forEach(row => {
-          const item = row.children[0].textContent;
-          const qty = row.children[1].firstChild.value;
-          if (!qty || Number(qty) === 0) return;
-          const location = row.children[2].firstChild.value;
-          const price = row.children[3].querySelector(".highlighted-text").textContent;
-          const total = row.children[4].querySelector(".highlighted-text").textContent;
-          txt += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${price} | Total: ${total}\n`;
+        Array.from(body.children).forEach(row => {
+          const item = row.children[0].innerText.trim();
+          const qty = row.children[1].querySelector("input").value;
+          const location = row.children[2].querySelector("select").value;
+          const unitPrice = row.children[3].querySelector("span").textContent;
+          const scuType = row.children[3].querySelector("select").value.toUpperCase();
+          const total = row.children[4].querySelector("span").textContent;
+          txt += `${item} x${qty} @ ${unitPrice} ${scuType} (${location}) = ${total}\n`;
         });
-        txt += `\n`;
       });
+      downloadFile(txt, title.replace(/\s+/g, "_") + "_" + new Date().toISOString().slice(0,16).replace(/[:T]/g,"-") + ".txt");
+    }
 
-      txt += `Grand Total: ${document.getElementById("grandTotalDisplay").textContent.split(": ")[1]}`;
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const filename = `${title.replace(/\s+/g, "_")}_${timestamp}.txt`;
-      downloadFile(txt, filename);
+    function downloadFile(content, filename) {
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
     }
   </script>
 </body>
