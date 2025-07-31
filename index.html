@@ -293,51 +293,6 @@
       downloadFile(csv, title.replace(/\s+/g, "_") + "_" + new Date().toISOString().slice(0,16).replace(/[:T]/g,"-") + ".csv");
     }
 
-    function exportTXT() {
-      const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
-      let txt = `Title: ${title}\n\n`;
-    
-      const bodies = [
-        { label: "Ship Mining", body: document.getElementById("shipMiningBody") },
-        { label: "Handheld and Light Ship Mining", body: document.getElementById("handMiningBody") },
-        { label: "Salvage", body: document.getElementById("salvageBody") }
-      ];
-    
-      let grandTotal = 0;
-    
-      bodies.forEach(({ label, body }) => {
-        let hasRows = Array.from(body.children).some(row => {
-          const qty = parseFloat(row.children[1].querySelector("input").value) || 0;
-          return qty > 0;
-        });
-    
-        if (hasRows) {
-          txt += `Category: ${label}\n`;
-    
-          Array.from(body.children).forEach(row => {
-            const item = row.children[0].innerText.trim();
-            const qty = row.children[1].querySelector("input").value;
-            if (!qty || qty === "0") return;
-    
-            const location = row.children[2].querySelector("select").value;
-            const unitPrice = row.children[3].querySelector("span").textContent;
-            const total = row.children[4].querySelector("span").textContent;
-            const parsedTotal = parseFloat(total.replace(/,/g, "")) || 0;
-    
-            txt += `${item} | Qty: ${qty} | Location: ${location} | Unit Price: ${unitPrice} | Total: ${total}\n`;
-            grandTotal += parsedTotal;
-          });
-    
-          txt += "\n";
-        }
-      });
-    
-      txt += `Grand Total: ${grandTotal.toLocaleString()}`;
-    
-      downloadFile(txt, title.replace(/\s+/g, "_") + "_" + new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-") + ".txt");
-    }
-
-
     function copyToClipboard() {
       const title = document.getElementById("manifestTitle").value || "Cargo Manifest";
       let textToCopy = `Title: ${title}\n\n`;
@@ -379,13 +334,38 @@
     
       textToCopy += `Grand Total: ${grandTotal.toLocaleString()}`;
     
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        alert("Manifest copied to clipboard!");
-      }).catch(() => {
-        alert("Failed to copy. Please try again.");
-      });
+      // Try clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          alert("Manifest copied to clipboard!");
+        }).catch(err => {
+          fallbackClipboardCopy(textToCopy);
+        });
+      } else {
+        fallbackClipboardCopy(textToCopy);
+      }
     }
-
+    
+    // Fallback for older browsers or insecure contexts
+    function fallbackClipboardCopy(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      // Move it offscreen
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+    
+      try {
+        const successful = document.execCommand("copy");
+        alert(successful ? "Manifest copied to clipboard!" : "Copy failed. Try manually.");
+      } catch (err) {
+        alert("Copy failed. Try manually.");
+      }
+    
+      document.body.removeChild(textArea);
+    }
 
     function downloadFile(content, filename) {
       const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
